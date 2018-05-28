@@ -21,7 +21,14 @@ d1 = i8
 */
 
 
-
+#define RELAY1 8
+#define RELAY2 7
+#define RELAY3 6
+#define RELAY4 5
+#define RELAY5 4
+#define RELAY6 3
+#define RELAY7 2
+#define RELAY8 1
 
 
 #include <ESP8266WiFi.h>
@@ -120,6 +127,17 @@ void setup(void){
   Serial.println("Booting Sketch...");
   printConstants();
   dht.begin();
+
+
+  pinMode(RELAY1, OUTPUT);
+  pinMode(RELAY2, OUTPUT);
+  pinMode(RELAY3, OUTPUT);
+  pinMode(RELAY4, OUTPUT);
+  pinMode(RELAY5, OUTPUT);
+  pinMode(RELAY6, OUTPUT);
+  pinMode(RELAY7, OUTPUT);
+  pinMode(RELAY8, OUTPUT);
+
 
   WiFi.mode(WIFI_AP_STA);
   WiFi.begin(ssid, password);
