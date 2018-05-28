@@ -21,6 +21,7 @@ d1 = i8
 */
 
 
+
 #define RELAY1 8
 #define RELAY2 7
 #define RELAY3 6
@@ -29,6 +30,8 @@ d1 = i8
 #define RELAY6 3
 #define RELAY7 2
 #define RELAY8 1
+
+#define DHTPIN 0
 
 
 #include <ESP8266WiFi.h>
@@ -42,7 +45,6 @@ d1 = i8
 #define ON HIGH
 
 #define DHTTYPE DHT22
-#define DHTPIN 0
 #define DHTREADFREQUENCY 10000    // read once every 10 sec
 #define DHTFAILFREQUENCY  3000    // if read failes try again after 3 seconds
 
@@ -125,9 +127,9 @@ void setup(void){
   Serial.begin(115200);
   Serial.println();
   Serial.println("Booting Sketch...");
-  printConstants();
-  dht.begin();
 
+  dht.begin();
+  printConstants();
 
   pinMode(RELAY1, OUTPUT);
   pinMode(RELAY2, OUTPUT);
@@ -139,19 +141,59 @@ void setup(void){
   pinMode(RELAY8, OUTPUT);
 
 
+  Serial.println("init WiFi...");
   WiFi.mode(WIFI_AP_STA);
   WiFi.begin(ssid, password);
 
   while(WiFi.waitForConnectResult() != WL_CONNECTED){
     WiFi.begin(ssid, password);
-    Serial.println("WiFi failed, retrying.");
+    Serial.println("WiFi failed, retrying...");
   }
 
+  Serial.print("init DNS");
   MDNS.begin(host);
 
+  Serial.println("init Webserver...");
+  httpServer.on("/humidity", [](){
+    char buffer[10];
+    sprintf(buffer, "%f", humidity);
+    httpServer.send(200, "text/plain", buffer);
+  });
+  httpServer.on("/temp", [](){
+    char buffer[10];
+    sprintf(buffer, "%f", temp);
+    httpServer.send(200, "text/plain", buffer);
+  });
+  httpServer.on("/dew", [](){
+    char buffer[10];
+    sprintf(buffer, "%f", dew);
+    httpServer.send(200, "text/plain", buffer);
+  });
+  httpServer.on("/hi", [](){
+    char buffer[10];
+    sprintf(buffer, "%f", hi);
+    httpServer.send(200, "text/plain", buffer);
+  });
+
+  httpServer.on("/relay1/on", [](){
+    digitalWrite(RELAY1, ON);
+    httpServer.send(200, "text/plain", "OK");
+  });
+  httpServer.on("/relay1/off", [](){
+    digitalWrite(RELAY1, OFF);
+    httpServer.send(200, "text/plain", "OK");
+  });
+  httpServer.on("/relay1/status", [](){
+    char buffer[2];
+    sprintf(buffer, "%d", digitalRead(RELAY1));
+    httpServer.send(200, "text/plain", buffer);
+  });
+
+  Serial.println("start Webserver");
   httpUpdater.setup(&httpServer, update_path, update_username, update_password);
   httpServer.begin();
 
+  
   MDNS.addService("http", "tcp", 80);
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
 }
