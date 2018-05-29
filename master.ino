@@ -22,14 +22,14 @@ d1 = i8
 
 
 
-#define RELAY1 8
-#define RELAY2 7
-#define RELAY3 6
-#define RELAY4 5
-#define RELAY5 4
-#define RELAY6 3
-#define RELAY7 2
-#define RELAY8 1
+#define RELAY1 15
+#define RELAY2 13
+#define RELAY3 12
+#define RELAY4 14
+#define RELAY5 2
+#define RELAY6 16
+#define RELAY7 4
+#define RELAY8 5
 
 #define DHTPIN 0
 
@@ -45,12 +45,12 @@ d1 = i8
 #define ON HIGH
 
 #define DHTTYPE DHT22
-#define DHTREADFREQUENCY 10000    // read once every 10 sec
+#define DHTREADFREQUENCY 30000    // read once every 30 sec
 #define DHTFAILFREQUENCY  3000    // if read failes try again after 3 seconds
 
 
 // Wifi/Webserver variables
-const char* host = "esp8266-webupdate";
+const char* host = "garage-back";
 const char* update_path = "/firmware";
 const char* update_username = "toby";
 const char* update_password = "toby";
@@ -131,6 +131,16 @@ void setup(void){
   dht.begin();
   printConstants();
 
+
+  digitalWrite(RELAY1, OFF);
+  digitalWrite(RELAY2, OFF);
+  digitalWrite(RELAY3, OFF);
+  digitalWrite(RELAY4, OFF);
+  digitalWrite(RELAY5, OFF);
+  digitalWrite(RELAY6, OFF);
+  digitalWrite(RELAY7, OFF);
+  digitalWrite(RELAY8, OFF);
+
   pinMode(RELAY1, OUTPUT);
   pinMode(RELAY2, OUTPUT);
   pinMode(RELAY3, OUTPUT);
@@ -150,44 +160,66 @@ void setup(void){
     Serial.println("WiFi failed, retrying...");
   }
 
+  Serial.print("IP address: ");
+  Serial.println(WiFi.localIP());
+
   Serial.print("init DNS");
   MDNS.begin(host);
 
   Serial.println("init Webserver...");
+
+  // handle humidity and sensor readings
   httpServer.on("/humidity", [](){
+    Serial.println("HTTP read Humidity");
     char buffer[10];
     sprintf(buffer, "%f", humidity);
     httpServer.send(200, "text/plain", buffer);
   });
   httpServer.on("/temp", [](){
+    Serial.println("HTTP read Temperature");
     char buffer[10];
     sprintf(buffer, "%f", temp);
     httpServer.send(200, "text/plain", buffer);
   });
   httpServer.on("/dew", [](){
+    Serial.println("HTTP read Dewpoint");
     char buffer[10];
     sprintf(buffer, "%f", dew);
     httpServer.send(200, "text/plain", buffer);
   });
   httpServer.on("/hi", [](){
+    Serial.println("HTTP read Heat Index");
     char buffer[10];
     sprintf(buffer, "%f", hi);
     httpServer.send(200, "text/plain", buffer);
   });
 
-  httpServer.on("/relay1/on", [](){
-    digitalWrite(RELAY1, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay1/off", [](){
-    digitalWrite(RELAY1, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay1/status", [](){
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
-    httpServer.send(200, "text/plain", buffer);
-  });
+
+  // Handle Relay 1 .... YES this can be coded better ....
+    httpServer.on("/relay1/on", [](){
+      Serial.println("HTTP relay1 on");
+      digitalWrite(RELAY1, ON);
+      httpServer.send(200, "text/plain", "OK");
+    });
+    httpServer.on("/relay1/off", [](){
+      Serial.println("HTTP relay1 off");
+      digitalWrite(RELAY1, OFF);
+      httpServer.send(200, "text/plain", "OK");
+    });
+    httpServer.on("/relay1/status", [](){
+      Serial.println("HTTP relay1 status");
+      char buffer[2];
+      sprintf(buffer, "%d", digitalRead(RELAY1));
+      httpServer.send(200, "text/plain", buffer);
+    });
+
+
+
+
+
+
+
+
 
   Serial.println("start Webserver");
   httpUpdater.setup(&httpServer, update_path, update_username, update_password);
