@@ -132,7 +132,7 @@ void setup(void){
   printConstants();
 
 
-  digitalWrite(RELAY1, ON);
+  digitalWrite(RELAY1, OFF);
   digitalWrite(RELAY2, OFF);
   digitalWrite(RELAY3, OFF);
   digitalWrite(RELAY4, OFF);
