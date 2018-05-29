@@ -5,18 +5,18 @@
 /*
 
 pin connections on breadboard
-d0 = dh22
+d3 = dh22
 a0 = button
 
 relay
-d8 = i1
-d7 = i2
-d6 = i3
-d5 = i4
-d4 = i5
-d3 = i6
-d2 = i7
-d1 = i8
+d8 = i1 = 15
+d7 = i2 = 13
+d6 = i3 = 12
+d5 = i4 = 14
+d0 = i5 = 16
+d4 = i6 =  2
+d2 = i7 =  4
+d1 = i8 =  5
 
 */
 
@@ -26,8 +26,8 @@ d1 = i8
 #define RELAY2 13
 #define RELAY3 12
 #define RELAY4 14
-#define RELAY5 2
-#define RELAY6 16
+#define RELAY5 16
+#define RELAY6 2
 #define RELAY7 4
 #define RELAY8 5
 
@@ -41,8 +41,8 @@ d1 = i8
 #include <ESP8266HTTPUpdateServer.h>
 #include "DHT.h"
 
-#define OFF LOW
-#define ON HIGH
+#define ON LOW
+#define OFF HIGH
 
 #define DHTTYPE DHT22
 #define DHTREADFREQUENCY 30000    // read once every 30 sec
@@ -79,7 +79,7 @@ void printConstants() {
   Serial.println("garage-control");
   Serial.print("Sensor Polling interval: ");
   Serial.print(DHTREADFREQUENCY);
-  Serial.print("DHT Sensor: ");
+  Serial.print("\tDHT Sensor: ");
   Serial.print(DHTTYPE);
   Serial.print("\tPin: ");
   Serial.println(DHTPIN);
@@ -132,7 +132,7 @@ void setup(void){
   printConstants();
 
 
-  digitalWrite(RELAY1, OFF);
+  digitalWrite(RELAY1, ON);
   digitalWrite(RELAY2, OFF);
   digitalWrite(RELAY3, OFF);
   digitalWrite(RELAY4, OFF);
@@ -163,7 +163,7 @@ void setup(void){
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.print("init DNS");
+  Serial.println("init DNS");
   MDNS.begin(host);
 
   Serial.println("init Webserver...");
@@ -217,18 +217,18 @@ void setup(void){
   // Handle Relay 2 .... YES this can be coded better ....
   httpServer.on("/relay2/on", [](){
     Serial.println("HTTP relay2 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY2, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay2/off", [](){
     Serial.println("HTTP relay2 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY2, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay2/status", [](){
     Serial.println("HTTP relay2 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY2));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -236,18 +236,18 @@ void setup(void){
   // Handle Relay 3 .... YES this can be coded better ....
   httpServer.on("/relay3/on", [](){
     Serial.println("HTTP relay3 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY3, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay3/off", [](){
     Serial.println("HTTP relay3 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY3, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay3/status", [](){
     Serial.println("HTTP relay3 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY3));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -255,18 +255,18 @@ void setup(void){
   // Handle Relay 4 .... YES this can be coded better ....
   httpServer.on("/relay4/on", [](){
     Serial.println("HTTP relay4 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY4, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay4/off", [](){
     Serial.println("HTTP relay4 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY4, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay4/status", [](){
     Serial.println("HTTP relay4 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY4));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -275,18 +275,18 @@ void setup(void){
   // Handle Relay 5 .... YES this can be coded better ....
   httpServer.on("/relay5/on", [](){
     Serial.println("HTTP relay5 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY5, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay5/off", [](){
     Serial.println("HTTP relay5 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY5, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay5/status", [](){
     Serial.println("HTTP relay5 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY5));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -295,18 +295,18 @@ void setup(void){
   // Handle Relay 6 .... YES this can be coded better ....
   httpServer.on("/relay6/on", [](){
     Serial.println("HTTP relay6 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY6, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay6/off", [](){
     Serial.println("HTTP relay6 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY6, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay6/status", [](){
     Serial.println("HTTP relay6 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY6));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -315,18 +315,18 @@ void setup(void){
   // Handle Relay 7 .... YES this can be coded better ....
   httpServer.on("/relay7/on", [](){
     Serial.println("HTTP relay7 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY7, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay7/off", [](){
     Serial.println("HTTP relay7 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY7, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay7/status", [](){
     Serial.println("HTTP relay7 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY7));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -335,18 +335,18 @@ void setup(void){
   // Handle Relay 8 .... YES this can be coded better ....
   httpServer.on("/relay8/on", [](){
     Serial.println("HTTP relay8 on");
-    digitalWrite(RELAY1, ON);
+    digitalWrite(RELAY8, ON);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay8/off", [](){
     Serial.println("HTTP relay8 off");
-    digitalWrite(RELAY1, OFF);
+    digitalWrite(RELAY8, OFF);
     httpServer.send(200, "text/plain", "OK");
   });
   httpServer.on("/relay8/status", [](){
     Serial.println("HTTP relay8 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "%d", digitalRead(RELAY8));
     httpServer.send(200, "text/plain", buffer);
   });
 
@@ -361,6 +361,7 @@ void setup(void){
   
   MDNS.addService("http", "tcp", 80);
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
+  Serial.println();
 }
 
 void loop(void){
