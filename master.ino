@@ -1,9 +1,6 @@
-/*
-  To upload through terminal you can use: curl -u admin:admin -F "image=@firmware.bin" esp8266-webupdate.local/firmware
-*/
+//  To upload through terminal you can use: curl -u admin:admin -F "image=@firmware.bin" esp8266-webupdate.local/firmware
 
 /*
-
 pin connections on breadboard
 d3 = dh22
 a0 = button
@@ -17,7 +14,6 @@ d0 = i5 = 16
 d4 = i6 =  2
 d2 = i7 =  4
 d1 = i8 =  5
-
 */
 
 
@@ -49,6 +45,47 @@ d1 = i8 =  5
 #define DHTFAILFREQUENCY  3000    // if read failes try again after 3 seconds
 
 
+/*
+button pressed values -> reading
+button 1 -> 960 -> 940 - 980
+button 2 -> 845 -> 820 - 860
+button 3 -> 670 -> 650 - 690
+
+button 1+2 -> 998 -> 980 - 1020
+button 2+3 -> 907 -> 880 - 930
+button 1+3 -> 981 -> ....
+button 1+2+3 -> 1008 -> ....
+*/
+
+#define BUTTON1LOW   950
+#define BUTTON1HIGH  970
+#define BUTTON2LOW   830
+#define BUTTON2HIGH  860
+#define BUTTON3LOW   650
+#define BUTTON3HIGH  690
+
+#define BUTTON1N2LOW   990
+#define BUTTON1N2HIGH 1010
+#define BUTTON1N3LOW   970
+#define BUTTON1N3HIGH  990
+#define BUTTON2N3LOW   900
+#define BUTTON2N3HIGH  920
+
+#define BUTTON1 1
+#define BUTTON2 2
+#define BUTTON3 3
+
+// Button debounce and ADC converting variables
+int buttonState;             // the current reading from the input pin
+int lastButtonState = LOW;   // the previous reading from the input pin
+int tmpButtonState = LOW;    // the current reading from the input pin
+
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
+
+
+
+
 // Wifi/Webserver variables
 const char* host = "garage-back";
 const char* update_path = "/firmware";
@@ -61,6 +98,7 @@ const char* password = "abcd1234";
 // DHT variabels
 float humidity, temp, hi, dew;
 uint32_t timerdht = 0;
+uint32_t timerbutton = 0;
 
 
 
@@ -398,5 +436,44 @@ void loop(void){
   }
 
 
+
+  int reading = analogRead(A0);
+
+  if ( millis() > timerbutton ) {
+    timerbutton = millis() + 200;
+    Serial.println(reading);
+  }
+  if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
+  else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
+  else if (reading>BUTTON3LOW && reading<BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
+  else    tmpButtonState = LOW;                                                       //No button is pressed;
+
+  if (tmpButtonState != lastButtonState) {
+    lastDebounceTime = millis();
+  }
+
+  if ((millis() - lastDebounceTime) > debounceDelay) {
+    buttonState = tmpButtonState;
+  }
+  lastButtonState = tmpButtonState;
+
+  switch(buttonState){
+    case LOW:
+      //Serial.println(reading);
+      break;
+    case BUTTON1:
+      //Serial.println("BUTTON1");
+      digitalWrite(RELAY1, ON);
+      break;
+    case BUTTON2:
+      //Serial.println("BUTTON2");
+      digitalWrite(RELAY2, ON);
+      break;
+    case BUTTON3:
+      //Serial.println("BUTTON3");
+      digitalWrite(RELAY1, OFF);
+      digitalWrite(RELAY2, OFF);
+      break;
+  }
 
 }
