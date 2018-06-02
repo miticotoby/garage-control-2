@@ -32,9 +32,10 @@ d1 = i8 =  5
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
+
 #include <ESP8266WebServer.h>
-#include <ESP8266mDNS.h>
 #include <ESP8266HTTPUpdateServer.h>
+#include <ESP8266mDNS.h>
 #include "DHT.h"
 
 #define ON LOW
@@ -99,6 +100,13 @@ const char* password = "abcd1234";
 float humidity, temp, hi, dew;
 uint32_t timerdht = 0;
 uint32_t timerbutton = 0;
+
+
+
+#ifdef UDP
+#include <WiFiUdp.h>
+WiFiUDP Udp;
+#endif
 
 
 
@@ -441,7 +449,12 @@ void loop(void){
 
   if ( millis() > timerbutton ) {
     timerbutton = millis() + 200;
-    Serial.println(reading);
+    //Serial.println(reading);
+#ifdef UDP
+    Udp.beginPacket("192.168.10.111", 8080);
+    Udp.write(reading);
+    Udp.endPacket();
+#endif
   }
   if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
   else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
@@ -459,18 +472,14 @@ void loop(void){
 
   switch(buttonState){
     case LOW:
-      //Serial.println(reading);
       break;
     case BUTTON1:
-      //Serial.println("BUTTON1");
       digitalWrite(RELAY1, ON);
       break;
     case BUTTON2:
-      //Serial.println("BUTTON2");
       digitalWrite(RELAY2, ON);
       break;
     case BUTTON3:
-      //Serial.println("BUTTON3");
       digitalWrite(RELAY1, OFF);
       digitalWrite(RELAY2, OFF);
       break;
