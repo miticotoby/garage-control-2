@@ -58,12 +58,12 @@ button 1+3 -> 981 -> ....
 button 1+2+3 -> 1008 -> ....
 */
 
-#define BUTTON1LOW   950
+#define BUTTON1LOW   940
 #define BUTTON1HIGH  970
-#define BUTTON2LOW   830
-#define BUTTON2HIGH  860
-#define BUTTON3LOW   650
-#define BUTTON3HIGH  690
+#define BUTTON2LOW   820
+#define BUTTON2HIGH  870
+#define BUTTON3LOW   630
+#define BUTTON3HIGH  680
 
 #define BUTTON1N2LOW   990
 #define BUTTON1N2HIGH 1010
@@ -81,10 +81,19 @@ int reading;
 int buttonState;             // the current reading from the input pin
 int lastButtonState = LOW;   // the previous reading from the input pin
 int tmpButtonState = LOW;    // the current reading from the input pin
-
+unsigned long lastButtonRead = 0;
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 int debounceDelay = 50;    // the debounce time; increase if the output flickers
 int analogReadDelay = 20;
+
+unsigned long lastRelay1Switch = 0;
+unsigned long lastRelay2Switch = 0;
+unsigned long lastRelay3Switch = 0;
+int relaytimer = 1000;
+
+bool relay1status = OFF;
+bool relay2status = OFF;
+bool relay3status = OFF;
 
 
 
@@ -107,7 +116,6 @@ unsigned long timerdht = 0;
 #include <WiFiUdp.h>
 WiFiUDP Udp;
 #endif
-
 
 
 
@@ -178,9 +186,9 @@ void setup(void){
   printConstants();
 
 
-  digitalWrite(RELAY1, OFF);
-  digitalWrite(RELAY2, OFF);
-  digitalWrite(RELAY3, OFF);
+  digitalWrite(RELAY1, relay1status);
+  digitalWrite(RELAY2, relay2status);
+  digitalWrite(RELAY3, relay3status);
   digitalWrite(RELAY4, OFF);
   digitalWrite(RELAY5, OFF);
   digitalWrite(RELAY6, OFF);
@@ -441,14 +449,12 @@ void loop(void){
 
 
 
-  if ( millis() % analogReadDelay == 0 ) {
+  if ((millis() - lastButtonRead) > analogReadDelay ) {
+    lastButtonRead = millis();
+
     reading = analogRead(A0);
     //Serial.println(reading);
-#ifdef UDP
-    Udp.beginPacket("192.168.10.111", 8080);
-    Udp.write(reading);
-    Udp.endPacket();
-#endif
+
     if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
     else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
     else if (reading>BUTTON3LOW && reading<BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
@@ -467,16 +473,35 @@ void loop(void){
       case LOW:
         break;
       case BUTTON1:
-        digitalWrite(RELAY1, ON);
+        if ( (millis() - lastRelay1Switch) > relaytimer ) {
+          lastRelay1Switch = millis();
+          relay1status = !relay1status;
+          digitalWrite(RELAY1, relay1status);
+        }
         break;
       case BUTTON2:
-        digitalWrite(RELAY2, ON);
+        if ( (millis() - lastRelay2Switch) > relaytimer ) {
+          lastRelay2Switch = millis();
+          relay2status = !relay2status;
+          digitalWrite(RELAY2, relay2status);
+        }
         break;
       case BUTTON3:
-        digitalWrite(RELAY1, OFF);
-        digitalWrite(RELAY2, OFF);
+        if ( (millis() - lastRelay3Switch) > relaytimer ) {
+          lastRelay3Switch = millis();
+          relay3status = !relay3status;
+          digitalWrite(RELAY3, relay3status);
+        }
         break;
     }
-  }
 
+#ifdef UDP
+    char buffer[100];
+    sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
+    Udp.beginPacket("192.168.10.111", 8080);
+    Udp.write(buffer);
+    Udp.endPacket();
+#endif
+
+  }
 }
