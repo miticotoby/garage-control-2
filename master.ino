@@ -77,6 +77,7 @@ button 1+2+3 -> 1008 -> ....
 #define BUTTON3 3
 
 // Button debounce and ADC converting variables
+int reading;
 int buttonState;             // the current reading from the input pin
 int lastButtonState = LOW;   // the previous reading from the input pin
 int tmpButtonState = LOW;    // the current reading from the input pin
@@ -445,10 +446,9 @@ void loop(void){
 
 
 
-  int reading = analogRead(A0);
-
   if ( millis() > timerbutton ) {
-    timerbutton = millis() + 200;
+    timerbutton = millis() + 100;
+    reading = analogRead(A0);
     //Serial.println(reading);
 #ifdef UDP
     Udp.beginPacket("192.168.10.111", 8080);
