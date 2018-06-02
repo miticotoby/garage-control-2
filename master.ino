@@ -83,8 +83,8 @@ int lastButtonState = LOW;   // the previous reading from the input pin
 int tmpButtonState = LOW;    // the current reading from the input pin
 
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
-
+int debounceDelay = 50;    // the debounce time; increase if the output flickers
+int analogReadDelay = 20;
 
 
 
@@ -99,8 +99,7 @@ const char* password = "abcd1234";
 
 // DHT variabels
 float humidity, temp, hi, dew;
-uint32_t timerdht = 0;
-uint32_t timerbutton = 0;
+unsigned long timerdht = 0;
 
 
 
@@ -442,8 +441,7 @@ void loop(void){
 
 
 
-  if ( millis() > timerbutton ) {
-    timerbutton = millis() + 100;
+  if ( millis() % analogReadDelay == 0 ) {
     reading = analogRead(A0);
     //Serial.println(reading);
 #ifdef UDP
