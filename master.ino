@@ -210,9 +210,6 @@ void setup(void){
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
-  Serial.println("init DNS");
-  MDNS.begin(host);
-
   Serial.println("init Webserver...");
 
   // handle humidity and sensor readings
@@ -398,16 +395,15 @@ void setup(void){
   });
 
 
-
-
+  Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
+  httpUpdater.setup(&httpServer, update_path, update_username, update_password);
 
   Serial.println("start Webserver");
-  httpUpdater.setup(&httpServer, update_path, update_username, update_password);
   httpServer.begin();
 
-  
+  Serial.println("init DNS");
+  MDNS.begin(host);
   MDNS.addService("http", "tcp", 80);
-  Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
   Serial.println();
 }
 
@@ -455,34 +451,34 @@ void loop(void){
     Udp.write(reading);
     Udp.endPacket();
 #endif
-  }
-  if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
-  else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
-  else if (reading>BUTTON3LOW && reading<BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
-  else    tmpButtonState = LOW;                                                       //No button is pressed;
-
-  if (tmpButtonState != lastButtonState) {
-    lastDebounceTime = millis();
-  }
-
-  if ((millis() - lastDebounceTime) > debounceDelay) {
-    buttonState = tmpButtonState;
-  }
-  lastButtonState = tmpButtonState;
-
-  switch(buttonState){
-    case LOW:
-      break;
-    case BUTTON1:
-      digitalWrite(RELAY1, ON);
-      break;
-    case BUTTON2:
-      digitalWrite(RELAY2, ON);
-      break;
-    case BUTTON3:
-      digitalWrite(RELAY1, OFF);
-      digitalWrite(RELAY2, OFF);
-      break;
+    if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
+    else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
+    else if (reading>BUTTON3LOW && reading<BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
+    else    tmpButtonState = LOW;                                                       //No button is pressed;
+  
+    if (tmpButtonState != lastButtonState) {
+      lastDebounceTime = millis();
+    }
+  
+    if ((millis() - lastDebounceTime) > debounceDelay) {
+      buttonState = tmpButtonState;
+    }
+    lastButtonState = tmpButtonState;
+  
+    switch(buttonState){
+      case LOW:
+        break;
+      case BUTTON1:
+        digitalWrite(RELAY1, ON);
+        break;
+      case BUTTON2:
+        digitalWrite(RELAY2, ON);
+        break;
+      case BUTTON3:
+        digitalWrite(RELAY1, OFF);
+        digitalWrite(RELAY2, OFF);
+        break;
+    }
   }
 
 }
