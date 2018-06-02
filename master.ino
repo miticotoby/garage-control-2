@@ -248,19 +248,21 @@ void setup(void){
 
   // Handle Relay 1 .... YES this can be coded better ....
   httpServer.on("/relay1/on", [](){
-    Serial.println("HTTP relay1 on");
+    //Serial.println("HTTP relay1 on");
+    relay1status = ON;
     digitalWrite(RELAY1, ON);
-    httpServer.send(200, "text/plain", "OK");
+    httpServer.send(200, "text/plain", "relay1 on");
   });
   httpServer.on("/relay1/off", [](){
-    Serial.println("HTTP relay1 off");
+    //Serial.println("HTTP relay1 off");
+    relay1status = OFF;
     digitalWrite(RELAY1, OFF);
-    httpServer.send(200, "text/plain", "OK");
+    httpServer.send(200, "text/plain", "relay1 off");
   });
   httpServer.on("/relay1/status", [](){
     Serial.println("HTTP relay1 status");
     char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY1));
+    sprintf(buffer, "relay1 %d", digitalRead(RELAY1));
     httpServer.send(200, "text/plain", buffer);
   });
 
