@@ -89,7 +89,7 @@ int analogReadDelay = 20;
 unsigned long lastRelay1Switch = 0;
 unsigned long lastRelay2Switch = 0;
 unsigned long lastRelay3Switch = 0;
-int relaytimer = 1000;
+int relaytimer = 750;
 
 bool relay1status = OFF;
 bool relay2status = OFF;
