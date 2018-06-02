@@ -262,7 +262,7 @@ void setup(void){
   httpServer.on("/relay1/status", [](){
     Serial.println("HTTP relay1 status");
     char buffer[2];
-    sprintf(buffer, "relay1 %d", digitalRead(RELAY1));
+    sprintf(buffer, "relay1 %s", digitalRead(RELAY1)?"off":"on");
     httpServer.send(200, "text/plain", buffer);
   });
 
