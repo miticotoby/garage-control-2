@@ -16,7 +16,19 @@ d2 = i7 =  4
 d1 = i8 =  5
 */
 
+//#define UDP
 
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+
+#include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
+#include <ESP8266mDNS.h>
+#include "DHT.h"
+
+#ifdef UDP
+#include <WiFiUdp.h>
+#endif
 
 #define RELAY1 15
 #define RELAY2 13
@@ -30,48 +42,12 @@ d1 = i8 =  5
 #define DHTPIN 0
 
 
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-#include <ESP8266WebServer.h>
-#include <ESP8266HTTPUpdateServer.h>
-#include <ESP8266mDNS.h>
-#include "DHT.h"
-
 #define ON LOW
 #define OFF HIGH
 
 #define DHTTYPE DHT22
 #define DHTREADFREQUENCY 30000    // read once every 30 sec
 #define DHTFAILFREQUENCY  3000    // if read failes try again after 3 seconds
-
-
-/*
-// first time test button pressed values -> reading
-button 1 -> 960 -> 940 - 980
-button 2 -> 845 -> 820 - 860
-button 3 -> 670 -> 650 - 690
-
-button 1+2 -> 998 -> 980 - 1020
-button 2+3 -> 907 -> 880 - 930
-button 1+3 -> 981 -> ....
-button 1+2+3 -> 1008 -> ....
-
-// old values
-#define BUTTON1LOW   940
-#define BUTTON1HIGH  970
-#define BUTTON2LOW   820
-#define BUTTON2HIGH  870
-#define BUTTON3LOW   630
-#define BUTTON3HIGH  680
-
-#define BUTTON1N2LOW   990
-#define BUTTON1N2HIGH 1010
-#define BUTTON1N3LOW   970
-#define BUTTON1N3HIGH  990
-#define BUTTON2N3LOW   900
-#define BUTTON2N3HIGH  920
-*/
 
 
 #define BUTTON1LOW   1024
@@ -150,20 +126,19 @@ float humidity, temp, hi, dew;
 unsigned long timerdht = 0;
 
 
-#define UDP
-
-#ifdef UDP
-#include <WiFiUdp.h>
-WiFiUDP Udp;
-#endif
 
 
 
+
+
+
+DHT dht(DHTPIN, DHTTYPE);
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
-DHT dht(DHTPIN, DHTTYPE);
-
+#ifdef UDP
+WiFiUDP Udp;
+#endif
 
 
 
@@ -229,11 +204,11 @@ void setup(void){
   digitalWrite(RELAY1, relay1status);
   digitalWrite(RELAY2, relay2status);
   digitalWrite(RELAY3, relay3status);
-  digitalWrite(RELAY4, OFF);
-  digitalWrite(RELAY5, OFF);
-  digitalWrite(RELAY6, OFF);
-  digitalWrite(RELAY7, OFF);
-  digitalWrite(RELAY8, OFF);
+  digitalWrite(RELAY4, relay4status);
+  digitalWrite(RELAY5, relay5status);
+  digitalWrite(RELAY6, relay6status);
+  digitalWrite(RELAY7, relay7status);
+  digitalWrite(RELAY8, relay8status);
 
   pinMode(RELAY1, OUTPUT);
   pinMode(RELAY2, OUTPUT);
@@ -260,51 +235,62 @@ void setup(void){
   Serial.println("init Webserver...");
 
   // handle humidity and sensor readings
-  httpServer.on("/humidity", [](){
-    Serial.println("HTTP read Humidity");
-    char buffer[10];
-    sprintf(buffer, "%f", humidity);
-    httpServer.send(200, "text/plain", buffer);
-  });
-  httpServer.on("/temp", [](){
-    Serial.println("HTTP read Temperature");
-    char buffer[10];
-    sprintf(buffer, "%f", temp);
-    httpServer.send(200, "text/plain", buffer);
-  });
-  httpServer.on("/dew", [](){
-    Serial.println("HTTP read Dewpoint");
-    char buffer[10];
-    sprintf(buffer, "%f", dew);
-    httpServer.send(200, "text/plain", buffer);
-  });
-  httpServer.on("/hi", [](){
-    Serial.println("HTTP read Heat Index");
-    char buffer[10];
-    sprintf(buffer, "%f", hi);
-    httpServer.send(200, "text/plain", buffer);
-  });
+  httpServer.on("/humidity",      [](){
+                                        Serial.println("HTTP read Humidity");
+                                        char buffer[10];
+                                        sprintf(buffer, "%f", humidity);
+                                        httpServer.send(200, "text/plain", buffer);
+                                     });
+  httpServer.on("/temp",          [](){
+                                        Serial.println("HTTP read Temperature");
+                                        char buffer[10];
+                                        sprintf(buffer, "%f", temp);
+                                        httpServer.send(200, "text/plain", buffer);
+                                     });
+  httpServer.on("/dew",           [](){
+                                        Serial.println("HTTP read Dewpoint");
+                                        char buffer[10];
+                                        sprintf(buffer, "%f", dew);
+                                        httpServer.send(200, "text/plain", buffer);
+                                     });
+  httpServer.on("/hi",            [](){
+                                        Serial.println("HTTP read Heat Index");
+                                        char buffer[10];
+                                        sprintf(buffer, "%f", hi);
+                                        httpServer.send(200, "text/plain", buffer);
+                                     });
 
 
-  // Handle Relay 1 .... YES this can be coded better ....
-  httpServer.on("/relay1/on", [](){
-    //Serial.println("HTTP relay1 on");
-    relay1status = ON;
-    digitalWrite(RELAY1, ON);
-    httpServer.send(200, "text/plain", "relay1 on");
-  });
-  httpServer.on("/relay1/off", [](){
-    //Serial.println("HTTP relay1 off");
-    relay1status = OFF;
-    digitalWrite(RELAY1, OFF);
-    httpServer.send(200, "text/plain", "relay1 off");
-  });
-  httpServer.on("/relay1/status", [](){
-    Serial.println("HTTP relay1 status");
-    char buffer[2];
-    sprintf(buffer, "relay1 %s", digitalRead(RELAY1)?"off":"on");
-    httpServer.send(200, "text/plain", buffer);
-  });
+
+
+  // Handle relay1 .... 
+  httpServer.on("/relay1/on",     [](){ 
+                                        Serial.println("HTTP relay1 on");
+                                        relay1status = ON;
+                                        digitalWrite(RELAY1, ON);
+                                        httpServer.send(200, "text/plain", "relay1 on");
+                                     });
+  httpServer.on("/relay1/off",    [](){ 
+                                        Serial.println("HTTP relay1 off");
+                                        relay1status = OFF;
+                                        digitalWrite(RELAY1, OFF);
+                                        httpServer.send(200, "text/plain", "relay1 off"); 
+                                     });
+  httpServer.on("/relay1/toggle", [](){ 
+                                        Serial.println("HTTP relay1 toggle");
+                                        relay1status = !relay1status; 
+                                        digitalWrite(RELAY1, relay1status); 
+                                        char buffer[2];
+                                        sprintf(buffer, "relay1 %s", relay1status?"off":"on"); 
+                                        httpServer.send(200, "text/plain", buffer); 
+                                     });
+  httpServer.on("/relay1/status", [](){ 
+                                        Serial.println("HTTP relay1 status");
+                                        relay1status = digitalRead(RELAY1);
+                                        char buffer[2];
+                                        sprintf(buffer, "relay1 %s", relay1status?"off":"on"); 
+                                        httpServer.send(200, "text/plain", buffer); 
+                                     });
 
 
   // Handle Relay 2 .... YES this can be coded better ....
