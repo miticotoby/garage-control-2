@@ -111,6 +111,7 @@ float humidity, temp, hi, dew;
 unsigned long timerdht = 0;
 
 
+#define UDP
 
 #ifdef UDP
 #include <WiFiUdp.h>
@@ -498,11 +499,13 @@ void loop(void){
     }
 
 #ifdef UDP
-    char buffer[100];
-    sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
-    Udp.beginPacket("192.168.10.111", 8080);
-    Udp.write(buffer);
-    Udp.endPacket();
+    if ( reading > 10 ) {
+      char buffer[100];
+      sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
+      Udp.beginPacket("192.168.10.111", 8080);
+      Udp.write(buffer);
+      Udp.endPacket();
+    }
 #endif
 
   }
