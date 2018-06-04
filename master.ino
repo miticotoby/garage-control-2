@@ -47,7 +47,7 @@ d1 = i8 =  5
 
 
 /*
-button pressed values -> reading
+// first time test button pressed values -> reading
 button 1 -> 960 -> 940 - 980
 button 2 -> 845 -> 820 - 860
 button 3 -> 670 -> 650 - 690
@@ -56,8 +56,8 @@ button 1+2 -> 998 -> 980 - 1020
 button 2+3 -> 907 -> 880 - 930
 button 1+3 -> 981 -> ....
 button 1+2+3 -> 1008 -> ....
-*/
 
+// old values
 #define BUTTON1LOW   940
 #define BUTTON1HIGH  970
 #define BUTTON2LOW   820
@@ -71,10 +71,38 @@ button 1+2+3 -> 1008 -> ....
 #define BUTTON1N3HIGH  990
 #define BUTTON2N3LOW   900
 #define BUTTON2N3HIGH  920
+*/
+
+
+#define BUTTON1LOW   1024
+#define BUTTON1HIGH  1024
+
+#define BUTTON2LOW   950
+#define BUTTON2HIGH  965
+
+#define BUTTON3LOW   835
+#define BUTTON3HIGH  855
+
+#define BUTTON4LOW   655
+#define BUTTON4HIGH  685
+
+#define BUTTON5LOW   500
+#define BUTTON5HIGH  535
+
+#define BUTTON6LOW   465
+#define BUTTON6HIGH  485
+
+#define BUTTON7LOW   350
+#define BUTTON7HIGH  380
 
 #define BUTTON1 1
 #define BUTTON2 2
 #define BUTTON3 3
+#define BUTTON4 4
+#define BUTTON5 5
+#define BUTTON6 6
+#define BUTTON7 7
+
 
 // Button debounce and ADC converting variables
 int reading;
@@ -86,14 +114,25 @@ unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 int debounceDelay = 50;    // the debounce time; increase if the output flickers
 int analogReadDelay = 20;
 
+
+int relaytimer = 500;
 unsigned long lastRelay1Switch = 0;
 unsigned long lastRelay2Switch = 0;
 unsigned long lastRelay3Switch = 0;
-int relaytimer = 750;
+unsigned long lastRelay4Switch = 0;
+unsigned long lastRelay5Switch = 0;
+unsigned long lastRelay6Switch = 0;
+unsigned long lastRelay7Switch = 0;
+unsigned long lastRelay8Switch = 0;
 
 bool relay1status = OFF;
 bool relay2status = OFF;
 bool relay3status = OFF;
+bool relay4status = OFF;
+bool relay5status = OFF;
+bool relay6status = OFF;
+bool relay7status = OFF;
+bool relay8status = OFF;
 
 
 
@@ -458,10 +497,14 @@ void loop(void){
     reading = analogRead(A0);
     //Serial.println(reading);
 
-    if      (reading>BUTTON1LOW && reading<BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
-    else if (reading>BUTTON2LOW && reading<BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
-    else if (reading>BUTTON3LOW && reading<BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
-    else    tmpButtonState = LOW;                                                       //No button is pressed;
+    if      (reading>=BUTTON1LOW && reading<=BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
+    else if (reading>=BUTTON2LOW && reading<=BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
+    else if (reading>=BUTTON3LOW && reading<=BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
+    else if (reading>=BUTTON4LOW && reading<=BUTTON4HIGH) tmpButtonState = BUTTON4;       //Read switch 4
+    else if (reading>=BUTTON5LOW && reading<=BUTTON5HIGH) tmpButtonState = BUTTON5;       //Read switch 5
+    else if (reading>=BUTTON6LOW && reading<=BUTTON6HIGH) tmpButtonState = BUTTON6;       //Read switch 6
+    else if (reading>=BUTTON7LOW && reading<=BUTTON7HIGH) tmpButtonState = BUTTON7;       //Read switch 7
+    else    tmpButtonState = LOW;                                                         //No button is pressed;
   
     if (tmpButtonState != lastButtonState) {
       lastDebounceTime = millis();
@@ -496,10 +539,38 @@ void loop(void){
           digitalWrite(RELAY3, relay3status);
         }
         break;
+      case BUTTON4:
+        if ( (millis() - lastRelay4Switch) > relaytimer ) {
+          lastRelay4Switch = millis();
+          relay4status = !relay4status;
+          digitalWrite(RELAY4, relay4status);
+        }
+        break;
+      case BUTTON5:
+        if ( (millis() - lastRelay5Switch) > relaytimer ) {
+          lastRelay5Switch = millis();
+          relay5status = !relay5status;
+          digitalWrite(RELAY5, relay5status);
+        }
+        break;
+      case BUTTON6:
+        if ( (millis() - lastRelay6Switch) > relaytimer ) {
+          lastRelay6Switch = millis();
+          relay6status = !relay6status;
+          digitalWrite(RELAY6, relay6status);
+        }
+        break;
+      case BUTTON7:
+        if ( (millis() - lastRelay7Switch) > relaytimer ) {
+          lastRelay7Switch = millis();
+          relay7status = !relay7status;
+          digitalWrite(RELAY7, relay7status);
+        }
+        break;
     }
 
 #ifdef UDP
-    if ( reading > 10 ) {
+    if ( reading > 50 ) {
       char buffer[100];
       sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
       Udp.beginPacket("192.168.10.111", 8080);
