@@ -197,68 +197,73 @@ float dewPoint(float celsius, float humidity)
 
 
 // Handle relay HTTP calls .... 
-
-bool httpRelayStatus(int pin, char* name) {
-   bool status;
-   char buffer[50];
-   status = digitalRead(pin);
-   sprintf(buffer, "%s %s", name, status?"off":"on"); 
-   Serial.println(buffer);
-   httpServer.send(200, "text/plain", buffer); 
-
-   return status;
-}
-
-bool httpRelaySetOld(int pin, char* name, bool status) {
-   char buffer[50];
-   sprintf(buffer, "%s %s", name, status?"off":"on");
-   Serial.println(buffer);
-   digitalWrite(pin, status);
-   httpServer.send(200, "text/plain", buffer);
-
-   return status;
-}
-
 struct relay {
   int pin;
   bool status;
   char name[50];
 };
 
-relay relaytmp;
-relay relay1 { RELAY1, OFF, "relay1" };
+relay *relaytmp;
+relay relay1 { RELAY1, relay1status, "relay1" };
+relay relay2 { RELAY2, relay2status, "relay2" };
+relay relay3 { RELAY3, relay3status, "relay3" };
+relay relay4 { RELAY4, relay4status, "relay4" };
+relay relay5 { RELAY5, relay5status, "relay5" };
+relay relay6 { RELAY6, relay6status, "relay6" };
+relay relay7 { RELAY7, relay7status, "relay7" };
+relay relay8 { RELAY8, relay8status, "relay8" };
+
+
+void httpRelayStatus() {
+   bool status;
+   char buffer[50];
+   status = digitalRead((*relaytmp).pin);
+   sprintf(buffer, "Status: %s %s", (*relaytmp).name, (*relaytmp).status?"off":"on"); 
+   httpServer.send(200, "text/plain", buffer); 
+}
 
 void httpRelaySet() {
    char buffer[50];
-   sprintf(buffer, "%s %s", relaytmp.name, relaytmp.status?"off":"on");
-   Serial.println(buffer);
-   digitalWrite(relaytmp.pin, relaytmp.status);
+   sprintf(buffer, "Set: %s %s", (*relaytmp).name, (*relaytmp).status?"off":"on");
+   digitalWrite((*relaytmp).pin, (*relaytmp).status);
    httpServer.send(200, "text/plain", buffer);
 }
 
+void httpRelaySetOn() {
+   (*relaytmp).status = ON;
+   httpRelaySet();
+}
 
+void httpRelaySetOff() {
+   (*relaytmp).status = OFF;
+   httpRelaySet();
+}
 
+void httpRelaySetToggle() {
+   (*relaytmp).status = !(*relaytmp).status;
+   httpRelaySet();
+}
 
-bool httpRelay(int pin, char* name, bool status) {
+bool httpRelay(relay *relaychild) {
   char uriOn[20];
   char uriOff[20];
   char uriToggle[20];
   char uriStatus[20];
 
-  sprintf(uriOn,     "/%s/on",     name);
-  sprintf(uriOff,    "/%s/off",    name);
-  sprintf(uriToggle, "/%s/toggle", name);
-  sprintf(uriStatus, "/%s/status", name);
+  relaytmp = relaychild;
 
-  relaytmp = relay1;
+  sprintf(uriOn,     "/%s/on",     (*relaytmp).name);
+  sprintf(uriOff,    "/%s/off",    (*relaytmp).name);
+  sprintf(uriToggle, "/%s/toggle", (*relaytmp).name);
+  sprintf(uriStatus, "/%s/status", (*relaytmp).name);
 
-  httpServer.on(uriOn,      httpRelaySet);
-  //httpServer.on(uriOn,      [](){ status = httpRelaySet(pin, name, ON); });
-  //httpServer.on(uriOff,     [](){ status = httpRelaySet(pin, name, OFF); });
-  //httpServer.on(uriToggle,  [](){ status = httpRelaySet(pin, name, !status); });
-  //httpServer.on(uriStatus,  [](){ status = httpRelayStatus(pin, name); });
 
-  return status;
+  httpServer.on(uriOn,      httpRelaySetOn);
+  httpServer.on(uriOff,     httpRelaySetOff);
+  httpServer.on(uriToggle,  httpRelaySetToggle);
+  httpServer.on(uriStatus,  httpRelayStatus);
+
+  return (*relaytmp).status;
 }
 
 
@@ -339,8 +344,16 @@ void setup(void){
 
 
   // Handle Relay 1
-  relay1status = httpRelay(RELAY1, "relay1", relay1status);
+  relay1status = httpRelay(&relay1);
+  relay2status = httpRelay(&relay2);
+  relay3status = httpRelay(&relay3);
+  relay4status = httpRelay(&relay4);
+  relay5status = httpRelay(&relay5);
+  relay6status = httpRelay(&relay6);
+  relay7status = httpRelay(&relay7);
+  relay8status = httpRelay(&relay8);
 
+  /*
   // Handle Relay 2 .... YES this can be coded better ....
   httpServer.on("/relay2/on", [](){
     Serial.println("HTTP relay2 on");
@@ -476,7 +489,7 @@ void setup(void){
     sprintf(buffer, "%d", digitalRead(RELAY8));
     httpServer.send(200, "text/plain", buffer);
   });
-
+  */
 
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
   httpUpdater.setup(&httpServer, update_path, update_username, update_password);
