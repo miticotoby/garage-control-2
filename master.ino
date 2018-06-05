@@ -72,7 +72,7 @@ d1 = i8 =  5
 #define BUTTON7HIGH  380
 
 #define BUTTON8LOW   145
-#define BUTTON8HIGH  160 
+#define BUTTON8HIGH  160
 
 #define BUTTON1 1
 #define BUTTON2 2
@@ -82,6 +82,7 @@ d1 = i8 =  5
 #define BUTTON6 6
 #define BUTTON7 7
 #define BUTTON8 8
+
 
 // Button debounce and ADC converting variables
 int reading;
