@@ -71,6 +71,9 @@ d1 = i8 =  5
 #define BUTTON7LOW   350
 #define BUTTON7HIGH  380
 
+#define BUTTON8LOW   145
+#define BUTTON8HIGH  160
+
 #define BUTTON1 1
 #define BUTTON2 2
 #define BUTTON3 3
@@ -78,6 +81,7 @@ d1 = i8 =  5
 #define BUTTON5 5
 #define BUTTON6 6
 #define BUTTON7 7
+#define BUTTON8 8
 
 
 // Button debounce and ADC converting variables
@@ -490,6 +494,7 @@ void loop(void){
     else if (reading>=BUTTON5LOW && reading<=BUTTON5HIGH) tmpButtonState = BUTTON5;       //Read switch 5
     else if (reading>=BUTTON6LOW && reading<=BUTTON6HIGH) tmpButtonState = BUTTON6;       //Read switch 6
     else if (reading>=BUTTON7LOW && reading<=BUTTON7HIGH) tmpButtonState = BUTTON7;       //Read switch 7
+    else if (reading>=BUTTON8LOW && reading<=BUTTON8HIGH) tmpButtonState = BUTTON8;       //Read switch 8
     else    tmpButtonState = LOW;                                                         //No button is pressed;
   
     if (tmpButtonState != lastButtonState) {
@@ -553,10 +558,17 @@ void loop(void){
           digitalWrite(RELAY7, relay7status);
         }
         break;
+      case BUTTON8:
+        if ( (millis() - lastRelay8Switch) > relaytimer ) {
+          lastRelay8Switch = millis();
+          relay8status = !relay8status;
+          digitalWrite(RELAY8, relay8status);
+        }
+        break;
     }
 
 #ifdef UDP
-    if ( reading > 50 ) {
+    if ( reading > 100 ) {
       char buffer[100];
       sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
       Udp.beginPacket("192.168.10.111", 8080);
