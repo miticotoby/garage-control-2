@@ -466,13 +466,6 @@ void loop(void){
       case BUTTON8:
         buttonRelay(&relay8);
         break;
-      case BUTTON8:
-        if ( (millis() - lastRelay8Switch) > relaytimer ) {
-          lastRelay8Switch = millis();
-          relay8status = !relay8status;
-          digitalWrite(RELAY8, relay8status);
-        }
-        break;
     }
 
 #ifdef UDP
