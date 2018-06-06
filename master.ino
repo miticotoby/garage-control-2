@@ -203,7 +203,7 @@ struct relay {
   char name[50];
 };
 
-relay *relaytmp;
+
 relay relay1 { RELAY1, relay1status, "relay1" };
 relay relay2 { RELAY2, relay2status, "relay2" };
 relay relay3 { RELAY3, relay3status, "relay3" };
@@ -214,56 +214,105 @@ relay relay7 { RELAY7, relay7status, "relay7" };
 relay relay8 { RELAY8, relay8status, "relay8" };
 
 
-void httpRelayStatus() {
+void httpRelayStatus(relay *relayPtr) {
    bool status;
    char buffer[50];
-   status = digitalRead((*relaytmp).pin);
-   sprintf(buffer, "Status: %s %s", (*relaytmp).name, (*relaytmp).status?"off":"on"); 
+   status = digitalRead((*relayPtr).pin);
+   sprintf(buffer, "Status: %s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on"); 
    httpServer.send(200, "text/plain", buffer); 
 }
 
-void httpRelaySet() {
+void httpRelaySet(relay *relayPtr) {
    char buffer[50];
-   sprintf(buffer, "Set: %s %s", (*relaytmp).name, (*relaytmp).status?"off":"on");
-   digitalWrite((*relaytmp).pin, (*relaytmp).status);
-   httpServer.send(200, "text/plain", buffer);
+   sprintf(buffer, "Set: %s %s", (*relayPtr).name, (*relayPtr).status?"off":"on");
+   digitalWrite((*relayPtr).pin, (*relayPtr).status);
+   httpServer.send(200, "text/plain\n", buffer);
 }
 
-void httpRelaySetOn() {
-   (*relaytmp).status = ON;
-   httpRelaySet();
-}
 
-void httpRelaySetOff() {
-   (*relaytmp).status = OFF;
-   httpRelaySet();
-}
+void httpRelay1SetOn()     {   relay1.status = ON;                    httpRelaySet(&relay1);    }
+void httpRelay1SetOff()    {   relay1.status = OFF;                   httpRelaySet(&relay1);    }
+void httpRelay1SetToggle() {   relay1.status = !relay1.status;        httpRelaySet(&relay1);    }
+void httpRelay1Status()    {                                          httpRelayStatus(&relay1); }
 
-void httpRelaySetToggle() {
-   (*relaytmp).status = !(*relaytmp).status;
-   httpRelaySet();
-}
+void httpRelay2SetOn()     {   relay2.status = ON;                    httpRelaySet(&relay2);    }
+void httpRelay2SetOff()    {   relay2.status = OFF;                   httpRelaySet(&relay2);    }
+void httpRelay2SetToggle() {   relay2.status = !relay2.status;        httpRelaySet(&relay2);    }
+void httpRelay2Status()    {                                          httpRelayStatus(&relay2); }
 
-bool httpRelay(relay *relaychild) {
-  char uriOn[20];
-  char uriOff[20];
-  char uriToggle[20];
-  char uriStatus[20];
+void httpRelay3SetOn()     {   relay3.status = ON;                    httpRelaySet(&relay3);    }
+void httpRelay3SetOff()    {   relay3.status = OFF;                   httpRelaySet(&relay3);    }
+void httpRelay3SetToggle() {   relay3.status = !relay3.status;        httpRelaySet(&relay3);    }
+void httpRelay3Status()    {                                          httpRelayStatus(&relay3); }
 
-  relaytmp = relaychild;
+void httpRelay4SetOn()     {   relay4.status = ON;                    httpRelaySet(&relay4);    }
+void httpRelay4SetOff()    {   relay4.status = OFF;                   httpRelaySet(&relay4);    }
+void httpRelay4SetToggle() {   relay4.status = !relay4.status;        httpRelaySet(&relay4);    }
+void httpRelay4Status()    {                                          httpRelayStatus(&relay4); }
 
-  sprintf(uriOn,     "/%s/on",     (*relaytmp).name);
-  sprintf(uriOff,    "/%s/off",    (*relaytmp).name);
-  sprintf(uriToggle, "/%s/toggle", (*relaytmp).name);
-  sprintf(uriStatus, "/%s/status", (*relaytmp).name);
+void httpRelay5SetOn()     {   relay5.status = ON;                    httpRelaySet(&relay5);    }
+void httpRelay5SetOff()    {   relay5.status = OFF;                   httpRelaySet(&relay5);    }
+void httpRelay5SetToggle() {   relay5.status = !relay5.status;        httpRelaySet(&relay5);    }
+void httpRelay5Status()    {                                          httpRelayStatus(&relay5); }
+
+void httpRelay6SetOn()     {   relay6.status = ON;                    httpRelaySet(&relay6);    }
+void httpRelay6SetOff()    {   relay6.status = OFF;                   httpRelaySet(&relay6);    }
+void httpRelay6SetToggle() {   relay6.status = !relay6.status;        httpRelaySet(&relay6);    }
+void httpRelay6Status()    {                                          httpRelayStatus(&relay6); }
+
+void httpRelay7SetOn()     {   relay7.status = ON;                    httpRelaySet(&relay7);    }
+void httpRelay7SetOff()    {   relay7.status = OFF;                   httpRelaySet(&relay7);    }
+void httpRelay7SetToggle() {   relay7.status = !relay7.status;        httpRelaySet(&relay7);    }
+void httpRelay7Status()    {                                          httpRelayStatus(&relay7); }
+
+void httpRelay8SetOn()     {   relay8.status = ON;                    httpRelaySet(&relay8);    }
+void httpRelay8SetOff()    {   relay8.status = OFF;                   httpRelaySet(&relay8);    }
+void httpRelay8SetToggle() {   relay8.status = !relay8.status;        httpRelaySet(&relay8);    }
+void httpRelay8Status()    {                                          httpRelayStatus(&relay8); }
 
 
-  httpServer.on(uriOn,      httpRelaySetOn);
-  httpServer.on(uriOff,     httpRelaySetOff);
-  httpServer.on(uriToggle,  httpRelaySetToggle);
-  httpServer.on(uriStatus,  httpRelayStatus);
+void httpRelay() {
 
-  return (*relaytmp).status;
+  httpServer.on("/relay1/on",      httpRelay1SetOn);
+  httpServer.on("/relay1/off",     httpRelay1SetOff);
+  httpServer.on("/relay1/toggle",  httpRelay1SetToggle);
+  httpServer.on("/relay1/status",  httpRelay1Status);
+
+  httpServer.on("/relay2/on",      httpRelay2SetOn);
+  httpServer.on("/relay2/off",     httpRelay2SetOff);
+  httpServer.on("/relay2/toggle",  httpRelay2SetToggle);
+  httpServer.on("/relay2/status",  httpRelay2Status);
+
+  httpServer.on("/relay3/on",      httpRelay3SetOn);
+  httpServer.on("/relay3/off",     httpRelay3SetOff);
+  httpServer.on("/relay3/toggle",  httpRelay3SetToggle);
+  httpServer.on("/relay3/status",  httpRelay3Status);
+
+  httpServer.on("/relay4/on",      httpRelay4SetOn);
+  httpServer.on("/relay4/off",     httpRelay4SetOff);
+  httpServer.on("/relay4/toggle",  httpRelay4SetToggle);
+  httpServer.on("/relay4/status",  httpRelay4Status);
+
+  httpServer.on("/relay5/on",      httpRelay5SetOn);
+  httpServer.on("/relay5/off",     httpRelay5SetOff);
+  httpServer.on("/relay5/toggle",  httpRelay5SetToggle);
+  httpServer.on("/relay5/status",  httpRelay5Status);
+
+  httpServer.on("/relay6/on",      httpRelay6SetOn);
+  httpServer.on("/relay6/off",     httpRelay6SetOff);
+  httpServer.on("/relay6/toggle",  httpRelay6SetToggle);
+  httpServer.on("/relay6/status",  httpRelay6Status);
+
+  httpServer.on("/relay7/on",      httpRelay7SetOn);
+  httpServer.on("/relay7/off",     httpRelay7SetOff);
+  httpServer.on("/relay7/toggle",  httpRelay7SetToggle);
+  httpServer.on("/relay7/status",  httpRelay7Status);
+
+  httpServer.on("/relay8/on",      httpRelay8SetOn);
+  httpServer.on("/relay8/off",     httpRelay8SetOff);
+  httpServer.on("/relay8/toggle",  httpRelay8SetToggle);
+  httpServer.on("/relay8/status",  httpRelay8Status);
+
 }
 
 
@@ -343,153 +392,8 @@ void setup(void){
 
 
 
-  // Handle Relay 1
-  relay1status = httpRelay(&relay1);
-  relay2status = httpRelay(&relay2);
-  relay3status = httpRelay(&relay3);
-  relay4status = httpRelay(&relay4);
-  relay5status = httpRelay(&relay5);
-  relay6status = httpRelay(&relay6);
-  relay7status = httpRelay(&relay7);
-  relay8status = httpRelay(&relay8);
-
-  /*
-  // Handle Relay 2 .... YES this can be coded better ....
-  httpServer.on("/relay2/on", [](){
-    Serial.println("HTTP relay2 on");
-    digitalWrite(RELAY2, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay2/off", [](){
-    Serial.println("HTTP relay2 off");
-    digitalWrite(RELAY2, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay2/status", [](){
-    Serial.println("HTTP relay2 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY2));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-  // Handle Relay 3 .... YES this can be coded better ....
-  httpServer.on("/relay3/on", [](){
-    Serial.println("HTTP relay3 on");
-    digitalWrite(RELAY3, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay3/off", [](){
-    Serial.println("HTTP relay3 off");
-    digitalWrite(RELAY3, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay3/status", [](){
-    Serial.println("HTTP relay3 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY3));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-  // Handle Relay 4 .... YES this can be coded better ....
-  httpServer.on("/relay4/on", [](){
-    Serial.println("HTTP relay4 on");
-    digitalWrite(RELAY4, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay4/off", [](){
-    Serial.println("HTTP relay4 off");
-    digitalWrite(RELAY4, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay4/status", [](){
-    Serial.println("HTTP relay4 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY4));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 5 .... YES this can be coded better ....
-  httpServer.on("/relay5/on", [](){
-    Serial.println("HTTP relay5 on");
-    digitalWrite(RELAY5, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay5/off", [](){
-    Serial.println("HTTP relay5 off");
-    digitalWrite(RELAY5, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay5/status", [](){
-    Serial.println("HTTP relay5 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY5));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 6 .... YES this can be coded better ....
-  httpServer.on("/relay6/on", [](){
-    Serial.println("HTTP relay6 on");
-    digitalWrite(RELAY6, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay6/off", [](){
-    Serial.println("HTTP relay6 off");
-    digitalWrite(RELAY6, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay6/status", [](){
-    Serial.println("HTTP relay6 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY6));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 7 .... YES this can be coded better ....
-  httpServer.on("/relay7/on", [](){
-    Serial.println("HTTP relay7 on");
-    digitalWrite(RELAY7, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay7/off", [](){
-    Serial.println("HTTP relay7 off");
-    digitalWrite(RELAY7, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay7/status", [](){
-    Serial.println("HTTP relay7 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY7));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 8 .... YES this can be coded better ....
-  httpServer.on("/relay8/on", [](){
-    Serial.println("HTTP relay8 on");
-    digitalWrite(RELAY8, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay8/off", [](){
-    Serial.println("HTTP relay8 off");
-    digitalWrite(RELAY8, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay8/status", [](){
-    Serial.println("HTTP relay8 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY8));
-    httpServer.send(200, "text/plain", buffer);
-  });
-  */
+  // Handle Relays
+  httpRelay();
 
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
   httpUpdater.setup(&httpServer, update_path, update_username, update_password);
