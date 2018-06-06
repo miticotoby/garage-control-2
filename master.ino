@@ -30,6 +30,7 @@ d1 = i8 =  5
 #include <WiFiUdp.h>
 #endif
 
+
 #define RELAY1 15
 #define RELAY2 13
 #define RELAY3 12
@@ -38,6 +39,7 @@ d1 = i8 =  5
 #define RELAY6 2
 #define RELAY7 4
 #define RELAY8 5
+
 
 #define DHTPIN 0
 
@@ -98,8 +100,8 @@ int analogReadDelay = 20;
 int relaytimer = 500;
 
 struct relay {
-  char name[50];
-  int pin;
+  const char name[50];
+  const int pin;
   bool status;
   unsigned long lastSwitch;
 };
@@ -113,6 +115,7 @@ relay relay5 { "relay5", RELAY5, OFF, 0 };
 relay relay6 { "relay6", RELAY6, OFF, 0 };
 relay relay7 { "relay7", RELAY7, OFF, 0 };
 relay relay8 { "relay8", RELAY8, OFF, 0 };
+
 
 
 
@@ -376,9 +379,6 @@ void setup(void){
                                         sprintf(buffer, "%f", hi);
                                         httpServer.send(200, "text/plain", buffer);
                                      });
-
-
-
 
 
   // Handle Relays
