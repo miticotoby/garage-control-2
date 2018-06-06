@@ -4,16 +4,6 @@
 pin connections on breadboard
 d3 = dh22
 a0 = button
-
-relay
-d8 = i1 = 15
-d7 = i2 = 13
-d6 = i3 = 12
-d5 = i4 = 14
-d0 = i5 = 16
-d4 = i6 =  2
-d2 = i7 =  4
-d1 = i8 =  5
 */
 
 //#define UDP
@@ -31,18 +21,7 @@ d1 = i8 =  5
 #endif
 
 
-#define RELAY1 15
-#define RELAY2 13
-#define RELAY3 12
-#define RELAY4 14
-#define RELAY5 16
-#define RELAY6 2
-#define RELAY7 4
-#define RELAY8 5
-
-
 #define DHTPIN 0
-
 
 #define ON LOW
 #define OFF HIGH
@@ -86,18 +65,7 @@ d1 = i8 =  5
 #define BUTTON8 8
 
 
-// Button debounce and ADC converting variables
-int reading;
-int buttonState;             // the current reading from the input pin
-int lastButtonState = LOW;   // the previous reading from the input pin
-int tmpButtonState = LOW;    // the current reading from the input pin
-unsigned long lastButtonRead = 0;
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-int debounceDelay = 50;    // the debounce time; increase if the output flickers
-int analogReadDelay = 20;
 
-
-int relaytimer = 500;
 
 struct relay {
   const char name[50];
@@ -106,15 +74,27 @@ struct relay {
   unsigned long lastSwitch;
 };
 
-relay relay1 { "relay1", RELAY1, OFF, 0 };
-relay relay2 { "relay2", RELAY2, OFF, 0 };
-relay relay3 { "relay3", RELAY3, OFF, 0 };
-relay relay4 { "relay4", RELAY4, OFF, 0 };
-relay relay5 { "relay5", RELAY5, OFF, 0 };
-relay relay6 { "relay6", RELAY6, OFF, 0 };
-relay relay7 { "relay7", RELAY7, OFF, 0 };
-relay relay8 { "relay8", RELAY8, OFF, 0 };
+relay relay1 { "relay1", D8, OFF, 0 };
+relay relay2 { "relay2", D7, OFF, 0 };
+relay relay3 { "relay3", D6, OFF, 0 };
+relay relay4 { "relay4", D5, OFF, 0 };
+relay relay5 { "relay5", D0, OFF, 0 };
+relay relay6 { "relay6", D4, OFF, 0 };
+relay relay7 { "relay7", D2, OFF, 0 };
+relay relay8 { "relay8", D1, OFF, 0 };
 
+
+
+// Button debounce and ADC converting variables
+int relaytimer = 500;
+int reading;
+int buttonState;             // the current reading from the input pin
+int lastButtonState = LOW;   // the previous reading from the input pin
+int tmpButtonState = LOW;    // the current reading from the input pin
+unsigned long lastButtonRead = 0;
+unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
+int debounceDelay = 50;    // the debounce time; increase if the output flickers
+int analogReadDelay = 20;
 
 
 
@@ -348,8 +328,12 @@ void setup(void){
     Serial.println("WiFi failed, retrying...");
   }
 
+  Serial.print("MAC: ");
+  Serial.println(WiFi.macAddress()); 
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("SSID: ");
+  Serial.println(ssid);
 
   Serial.println("init Webserver...");
 
