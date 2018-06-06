@@ -96,23 +96,23 @@ int analogReadDelay = 20;
 
 
 int relaytimer = 500;
-unsigned long lastRelay1Switch = 0;
-unsigned long lastRelay2Switch = 0;
-unsigned long lastRelay3Switch = 0;
-unsigned long lastRelay4Switch = 0;
-unsigned long lastRelay5Switch = 0;
-unsigned long lastRelay6Switch = 0;
-unsigned long lastRelay7Switch = 0;
-unsigned long lastRelay8Switch = 0;
 
-bool relay1status = OFF;
-bool relay2status = OFF;
-bool relay3status = OFF;
-bool relay4status = OFF;
-bool relay5status = OFF;
-bool relay6status = OFF;
-bool relay7status = OFF;
-bool relay8status = OFF;
+struct relay {
+  char name[50];
+  int pin;
+  bool status;
+  unsigned long lastSwitch;
+};
+
+
+relay relay1 { "relay1", RELAY1, OFF, 0 };
+relay relay2 { "relay2", RELAY2, OFF, 0 };
+relay relay3 { "relay3", RELAY3, OFF, 0 };
+relay relay4 { "relay4", RELAY4, OFF, 0 };
+relay relay5 { "relay5", RELAY5, OFF, 0 };
+relay relay6 { "relay6", RELAY6, OFF, 0 };
+relay relay7 { "relay7", RELAY7, OFF, 0 };
+relay relay8 { "relay8", RELAY8, OFF, 0 };
 
 
 
@@ -196,23 +196,14 @@ float dewPoint(float celsius, float humidity)
 
 
 
-// Handle relay HTTP calls .... 
-struct relay {
-  int pin;
-  bool status;
-  char name[50];
-};
-
-
-relay relay1 { RELAY1, relay1status, "relay1" };
-relay relay2 { RELAY2, relay2status, "relay2" };
-relay relay3 { RELAY3, relay3status, "relay3" };
-relay relay4 { RELAY4, relay4status, "relay4" };
-relay relay5 { RELAY5, relay5status, "relay5" };
-relay relay6 { RELAY6, relay6status, "relay6" };
-relay relay7 { RELAY7, relay7status, "relay7" };
-relay relay8 { RELAY8, relay8status, "relay8" };
-
+// Handle relay calls .... 
+void buttonRelay(relay *relayPtr) {
+  if ( (millis() - (*relayPtr).lastSwitch) > relaytimer ) {
+    (*relayPtr).lastSwitch = millis();
+    (*relayPtr).status = !(*relayPtr).status;
+    digitalWrite((*relayPtr).pin, (*relayPtr).status);
+  }
+}
 
 void httpRelayStatus(relay *relayPtr) {
    bool status;
@@ -328,25 +319,23 @@ void setup(void){
   dht.begin();
   printConstants();
 
+  digitalWrite(relay1.pin, relay1.status);
+  digitalWrite(relay2.pin, relay2.status);
+  digitalWrite(relay3.pin, relay3.status);
+  digitalWrite(relay4.pin, relay4.status);
+  digitalWrite(relay5.pin, relay5.status);
+  digitalWrite(relay6.pin, relay6.status);
+  digitalWrite(relay7.pin, relay7.status);
+  digitalWrite(relay8.pin, relay8.status);
 
-  digitalWrite(RELAY1, relay1status);
-  digitalWrite(RELAY2, relay2status);
-  digitalWrite(RELAY3, relay3status);
-  digitalWrite(RELAY4, relay4status);
-  digitalWrite(RELAY5, relay5status);
-  digitalWrite(RELAY6, relay6status);
-  digitalWrite(RELAY7, relay7status);
-  digitalWrite(RELAY8, relay8status);
-
-  pinMode(RELAY1, OUTPUT);
-  pinMode(RELAY2, OUTPUT);
-  pinMode(RELAY3, OUTPUT);
-  pinMode(RELAY4, OUTPUT);
-  pinMode(RELAY5, OUTPUT);
-  pinMode(RELAY6, OUTPUT);
-  pinMode(RELAY7, OUTPUT);
-  pinMode(RELAY8, OUTPUT);
-
+  pinMode(relay1.pin, OUTPUT);
+  pinMode(relay2.pin, OUTPUT);
+  pinMode(relay3.pin, OUTPUT);
+  pinMode(relay4.pin, OUTPUT);
+  pinMode(relay5.pin, OUTPUT);
+  pinMode(relay6.pin, OUTPUT);
+  pinMode(relay7.pin, OUTPUT);
+  pinMode(relay8.pin, OUTPUT);
 
   Serial.println("init WiFi...");
   WiFi.mode(WIFI_AP_STA);
@@ -394,6 +383,7 @@ void setup(void){
 
   // Handle Relays
   httpRelay();
+
 
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
   httpUpdater.setup(&httpServer, update_path, update_username, update_password);
@@ -466,72 +456,41 @@ void loop(void){
       buttonState = tmpButtonState;
     }
     lastButtonState = tmpButtonState;
-  
+ 
+ 
     switch(buttonState){
       case LOW:
         break;
       case BUTTON1:
-        if ( (millis() - lastRelay1Switch) > relaytimer ) {
-          lastRelay1Switch = millis();
-          relay1status = !relay1status;
-          digitalWrite(RELAY1, relay1status);
-        }
+        buttonRelay(&relay1);
         break;
       case BUTTON2:
-        if ( (millis() - lastRelay2Switch) > relaytimer ) {
-          lastRelay2Switch = millis();
-          relay2status = !relay2status;
-          digitalWrite(RELAY2, relay2status);
-        }
+        buttonRelay(&relay2);
         break;
       case BUTTON3:
-        if ( (millis() - lastRelay3Switch) > relaytimer ) {
-          lastRelay3Switch = millis();
-          relay3status = !relay3status;
-          digitalWrite(RELAY3, relay3status);
-        }
+        buttonRelay(&relay3);
         break;
       case BUTTON4:
-        if ( (millis() - lastRelay4Switch) > relaytimer ) {
-          lastRelay4Switch = millis();
-          relay4status = !relay4status;
-          digitalWrite(RELAY4, relay4status);
-        }
+        buttonRelay(&relay4);
         break;
       case BUTTON5:
-        if ( (millis() - lastRelay5Switch) > relaytimer ) {
-          lastRelay5Switch = millis();
-          relay5status = !relay5status;
-          digitalWrite(RELAY5, relay5status);
-        }
+        buttonRelay(&relay5);
         break;
       case BUTTON6:
-        if ( (millis() - lastRelay6Switch) > relaytimer ) {
-          lastRelay6Switch = millis();
-          relay6status = !relay6status;
-          digitalWrite(RELAY6, relay6status);
-        }
+        buttonRelay(&relay6);
         break;
       case BUTTON7:
-        if ( (millis() - lastRelay7Switch) > relaytimer ) {
-          lastRelay7Switch = millis();
-          relay7status = !relay7status;
-          digitalWrite(RELAY7, relay7status);
-        }
+        buttonRelay(&relay7);
         break;
       case BUTTON8:
-        if ( (millis() - lastRelay8Switch) > relaytimer ) {
-          lastRelay8Switch = millis();
-          relay8status = !relay8status;
-          digitalWrite(RELAY8, relay8status);
-        }
+        buttonRelay(&relay8);
         break;
     }
 
 #ifdef UDP
     if ( reading > 100 ) {
       char buffer[100];
-      sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
+      sprintf(buffer, "reading %d\tbutton: %d\n", reading, buttonState);
       Udp.beginPacket("192.168.10.111", 8080);
       Udp.write(buffer);
       Udp.endPacket();
