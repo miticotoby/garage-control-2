@@ -16,6 +16,9 @@ a0 = button
 #include <ESP8266mDNS.h>
 #include "DHT.h"
 
+#include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+#include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
+
 #ifdef UDP
 #include <WiFiUdp.h>
 #endif
@@ -95,19 +98,18 @@ int debounceDelay = 50;    // the debounce time; increase if the output flickers
 int analogReadDelay = 20;
 
 
+// DHT variabels
+float humidity, temp, hi, dew;
+unsigned long timerdht = 0;
+
 
 // Wifi/Webserver variables
 const char* host = "garage-back";
 const char* update_path = "/firmware";
 const char* update_username = "toby";
 const char* update_password = "toby";
-const char* ssid = "lazog";
-const char* password = "abcd1234";
 
 
-// DHT variabels
-float humidity, temp, hi, dew;
-unsigned long timerdht = 0;
 
 
 
@@ -119,6 +121,8 @@ unsigned long timerdht = 0;
 DHT dht(DHTPIN, DHTTYPE);
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
+
+WiFiManager wifiManager;
 
 #ifdef UDP
 WiFiUDP Udp;
@@ -318,23 +322,10 @@ void setup(void){
   pinMode(relay8.pin, OUTPUT);
 
   Serial.println("init WiFi...");
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.begin(ssid, password);
+  wifiManager.autoConnect();
 
-  while(WiFi.waitForConnectResult() != WL_CONNECTED){
-    WiFi.begin(ssid, password);
-    Serial.println("WiFi failed, retrying...");
-  }
-
-  Serial.print("MAC: ");
-  Serial.println(WiFi.macAddress()); 
-  Serial.print("IP address: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("SSID: ");
-  Serial.println(ssid);
 
   Serial.println("init Webserver...");
-
   // handle humidity and sensor readings
   httpServer.on("/humidity",      [](){
                                         Serial.println("HTTP read Humidity");
@@ -361,7 +352,6 @@ void setup(void){
                                         httpServer.send(200, "text/plain", buffer);
                                      });
 
-
   // Handle Relays
   httpRelay();
 
@@ -378,10 +368,9 @@ void setup(void){
   Serial.println();
 }
 
+
 void loop(void){
   httpServer.handleClient();
-
-
 
 
   if ( millis() > timerdht ) {    // switch fan not more than once every FANSWITCHFREQUENCY

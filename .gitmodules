@@ -1,0 +1,3 @@
+[submodule "libs/WiFiManager"]
+	path = libs/WiFiManager
+	url = git@github.com:tzapu/WiFiManager.git
