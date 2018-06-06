@@ -106,7 +106,6 @@ struct relay {
   unsigned long lastSwitch;
 };
 
-
 relay relay1 { "relay1", RELAY1, OFF, 0 };
 relay relay2 { "relay2", RELAY2, OFF, 0 };
 relay relay3 { "relay3", RELAY3, OFF, 0 };
@@ -212,15 +211,15 @@ void httpRelayStatus(relay *relayPtr) {
    bool status;
    char buffer[50];
    status = digitalRead((*relayPtr).pin);
-   sprintf(buffer, "Status: %s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on"); 
+   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on"); 
    httpServer.send(200, "text/plain", buffer); 
 }
 
 void httpRelaySet(relay *relayPtr) {
    char buffer[50];
-   sprintf(buffer, "Set: %s %s", (*relayPtr).name, (*relayPtr).status?"off":"on");
+   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on");
    digitalWrite((*relayPtr).pin, (*relayPtr).status);
-   httpServer.send(200, "text/plain\n", buffer);
+   httpServer.send(200, "text/plain", buffer);
 }
 
 
