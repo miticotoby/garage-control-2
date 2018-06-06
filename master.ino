@@ -4,16 +4,6 @@
 pin connections on breadboard
 d3 = dh22
 a0 = button
-
-relay
-d8 = i1 = 15
-d7 = i2 = 13
-d6 = i3 = 12
-d5 = i4 = 14
-d0 = i5 = 16
-d4 = i6 =  2
-d2 = i7 =  4
-d1 = i8 =  5
 */
 
 //#define UDP
@@ -30,17 +20,8 @@ d1 = i8 =  5
 #include <WiFiUdp.h>
 #endif
 
-#define RELAY1 15
-#define RELAY2 13
-#define RELAY3 12
-#define RELAY4 14
-#define RELAY5 16
-#define RELAY6 2
-#define RELAY7 4
-#define RELAY8 5
 
 #define DHTPIN 0
-
 
 #define ON LOW
 #define OFF HIGH
@@ -84,7 +65,26 @@ d1 = i8 =  5
 #define BUTTON8 8
 
 
+struct relay {
+  const char name[50];
+  const int pin;
+  bool status;
+  unsigned long lastSwitch;
+};
+
+relay relay1 { "relay1", D8, OFF, 0 };
+relay relay2 { "relay2", D7, OFF, 0 };
+relay relay3 { "relay3", D6, OFF, 0 };
+relay relay4 { "relay4", D5, OFF, 0 };
+relay relay5 { "relay5", D0, OFF, 0 };
+relay relay6 { "relay6", D4, OFF, 0 };
+relay relay7 { "relay7", D2, OFF, 0 };
+relay relay8 { "relay8", D1, OFF, 0 };
+
+
+
 // Button debounce and ADC converting variables
+int relaytimer = 500;
 int reading;
 int buttonState;             // the current reading from the input pin
 int lastButtonState = LOW;   // the previous reading from the input pin
@@ -93,26 +93,6 @@ unsigned long lastButtonRead = 0;
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 int debounceDelay = 50;    // the debounce time; increase if the output flickers
 int analogReadDelay = 20;
-
-
-int relaytimer = 500;
-unsigned long lastRelay1Switch = 0;
-unsigned long lastRelay2Switch = 0;
-unsigned long lastRelay3Switch = 0;
-unsigned long lastRelay4Switch = 0;
-unsigned long lastRelay5Switch = 0;
-unsigned long lastRelay6Switch = 0;
-unsigned long lastRelay7Switch = 0;
-unsigned long lastRelay8Switch = 0;
-
-bool relay1status = OFF;
-bool relay2status = OFF;
-bool relay3status = OFF;
-bool relay4status = OFF;
-bool relay5status = OFF;
-bool relay6status = OFF;
-bool relay7status = OFF;
-bool relay8status = OFF;
 
 
 
@@ -195,6 +175,121 @@ float dewPoint(float celsius, float humidity)
 
 
 
+
+// Handle relay calls .... 
+void buttonRelay(relay *relayPtr) {
+  if ( (millis() - (*relayPtr).lastSwitch) > relaytimer ) {
+    (*relayPtr).lastSwitch = millis();
+    (*relayPtr).status = !(*relayPtr).status;
+    digitalWrite((*relayPtr).pin, (*relayPtr).status);
+  }
+}
+
+void httpRelayStatus(relay *relayPtr) {
+   bool status;
+   char buffer[50];
+   status = digitalRead((*relayPtr).pin);
+   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on"); 
+   httpServer.send(200, "text/plain", buffer); 
+}
+
+void httpRelaySet(relay *relayPtr) {
+   char buffer[50];
+   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on");
+   digitalWrite((*relayPtr).pin, (*relayPtr).status);
+   httpServer.send(200, "text/plain", buffer);
+}
+
+
+void httpRelay1SetOn()     {   relay1.status = ON;                    httpRelaySet(&relay1);    }
+void httpRelay1SetOff()    {   relay1.status = OFF;                   httpRelaySet(&relay1);    }
+void httpRelay1SetToggle() {   relay1.status = !relay1.status;        httpRelaySet(&relay1);    }
+void httpRelay1Status()    {                                          httpRelayStatus(&relay1); }
+
+void httpRelay2SetOn()     {   relay2.status = ON;                    httpRelaySet(&relay2);    }
+void httpRelay2SetOff()    {   relay2.status = OFF;                   httpRelaySet(&relay2);    }
+void httpRelay2SetToggle() {   relay2.status = !relay2.status;        httpRelaySet(&relay2);    }
+void httpRelay2Status()    {                                          httpRelayStatus(&relay2); }
+
+void httpRelay3SetOn()     {   relay3.status = ON;                    httpRelaySet(&relay3);    }
+void httpRelay3SetOff()    {   relay3.status = OFF;                   httpRelaySet(&relay3);    }
+void httpRelay3SetToggle() {   relay3.status = !relay3.status;        httpRelaySet(&relay3);    }
+void httpRelay3Status()    {                                          httpRelayStatus(&relay3); }
+
+void httpRelay4SetOn()     {   relay4.status = ON;                    httpRelaySet(&relay4);    }
+void httpRelay4SetOff()    {   relay4.status = OFF;                   httpRelaySet(&relay4);    }
+void httpRelay4SetToggle() {   relay4.status = !relay4.status;        httpRelaySet(&relay4);    }
+void httpRelay4Status()    {                                          httpRelayStatus(&relay4); }
+
+void httpRelay5SetOn()     {   relay5.status = ON;                    httpRelaySet(&relay5);    }
+void httpRelay5SetOff()    {   relay5.status = OFF;                   httpRelaySet(&relay5);    }
+void httpRelay5SetToggle() {   relay5.status = !relay5.status;        httpRelaySet(&relay5);    }
+void httpRelay5Status()    {                                          httpRelayStatus(&relay5); }
+
+void httpRelay6SetOn()     {   relay6.status = ON;                    httpRelaySet(&relay6);    }
+void httpRelay6SetOff()    {   relay6.status = OFF;                   httpRelaySet(&relay6);    }
+void httpRelay6SetToggle() {   relay6.status = !relay6.status;        httpRelaySet(&relay6);    }
+void httpRelay6Status()    {                                          httpRelayStatus(&relay6); }
+
+void httpRelay7SetOn()     {   relay7.status = ON;                    httpRelaySet(&relay7);    }
+void httpRelay7SetOff()    {   relay7.status = OFF;                   httpRelaySet(&relay7);    }
+void httpRelay7SetToggle() {   relay7.status = !relay7.status;        httpRelaySet(&relay7);    }
+void httpRelay7Status()    {                                          httpRelayStatus(&relay7); }
+
+void httpRelay8SetOn()     {   relay8.status = ON;                    httpRelaySet(&relay8);    }
+void httpRelay8SetOff()    {   relay8.status = OFF;                   httpRelaySet(&relay8);    }
+void httpRelay8SetToggle() {   relay8.status = !relay8.status;        httpRelaySet(&relay8);    }
+void httpRelay8Status()    {                                          httpRelayStatus(&relay8); }
+
+
+void httpRelay() {
+
+  httpServer.on("/relay1/on",      httpRelay1SetOn);
+  httpServer.on("/relay1/off",     httpRelay1SetOff);
+  httpServer.on("/relay1/toggle",  httpRelay1SetToggle);
+  httpServer.on("/relay1/status",  httpRelay1Status);
+
+  httpServer.on("/relay2/on",      httpRelay2SetOn);
+  httpServer.on("/relay2/off",     httpRelay2SetOff);
+  httpServer.on("/relay2/toggle",  httpRelay2SetToggle);
+  httpServer.on("/relay2/status",  httpRelay2Status);
+
+  httpServer.on("/relay3/on",      httpRelay3SetOn);
+  httpServer.on("/relay3/off",     httpRelay3SetOff);
+  httpServer.on("/relay3/toggle",  httpRelay3SetToggle);
+  httpServer.on("/relay3/status",  httpRelay3Status);
+
+  httpServer.on("/relay4/on",      httpRelay4SetOn);
+  httpServer.on("/relay4/off",     httpRelay4SetOff);
+  httpServer.on("/relay4/toggle",  httpRelay4SetToggle);
+  httpServer.on("/relay4/status",  httpRelay4Status);
+
+  httpServer.on("/relay5/on",      httpRelay5SetOn);
+  httpServer.on("/relay5/off",     httpRelay5SetOff);
+  httpServer.on("/relay5/toggle",  httpRelay5SetToggle);
+  httpServer.on("/relay5/status",  httpRelay5Status);
+
+  httpServer.on("/relay6/on",      httpRelay6SetOn);
+  httpServer.on("/relay6/off",     httpRelay6SetOff);
+  httpServer.on("/relay6/toggle",  httpRelay6SetToggle);
+  httpServer.on("/relay6/status",  httpRelay6Status);
+
+  httpServer.on("/relay7/on",      httpRelay7SetOn);
+  httpServer.on("/relay7/off",     httpRelay7SetOff);
+  httpServer.on("/relay7/toggle",  httpRelay7SetToggle);
+  httpServer.on("/relay7/status",  httpRelay7Status);
+
+  httpServer.on("/relay8/on",      httpRelay8SetOn);
+  httpServer.on("/relay8/off",     httpRelay8SetOff);
+  httpServer.on("/relay8/toggle",  httpRelay8SetToggle);
+  httpServer.on("/relay8/status",  httpRelay8Status);
+
+}
+
+
+
+
+
 void setup(void){
 
   Serial.begin(115200);
@@ -204,25 +299,23 @@ void setup(void){
   dht.begin();
   printConstants();
 
+  digitalWrite(relay1.pin, relay1.status);
+  digitalWrite(relay2.pin, relay2.status);
+  digitalWrite(relay3.pin, relay3.status);
+  digitalWrite(relay4.pin, relay4.status);
+  digitalWrite(relay5.pin, relay5.status);
+  digitalWrite(relay6.pin, relay6.status);
+  digitalWrite(relay7.pin, relay7.status);
+  digitalWrite(relay8.pin, relay8.status);
 
-  digitalWrite(RELAY1, relay1status);
-  digitalWrite(RELAY2, relay2status);
-  digitalWrite(RELAY3, relay3status);
-  digitalWrite(RELAY4, relay4status);
-  digitalWrite(RELAY5, relay5status);
-  digitalWrite(RELAY6, relay6status);
-  digitalWrite(RELAY7, relay7status);
-  digitalWrite(RELAY8, relay8status);
-
-  pinMode(RELAY1, OUTPUT);
-  pinMode(RELAY2, OUTPUT);
-  pinMode(RELAY3, OUTPUT);
-  pinMode(RELAY4, OUTPUT);
-  pinMode(RELAY5, OUTPUT);
-  pinMode(RELAY6, OUTPUT);
-  pinMode(RELAY7, OUTPUT);
-  pinMode(RELAY8, OUTPUT);
-
+  pinMode(relay1.pin, OUTPUT);
+  pinMode(relay2.pin, OUTPUT);
+  pinMode(relay3.pin, OUTPUT);
+  pinMode(relay4.pin, OUTPUT);
+  pinMode(relay5.pin, OUTPUT);
+  pinMode(relay6.pin, OUTPUT);
+  pinMode(relay7.pin, OUTPUT);
+  pinMode(relay8.pin, OUTPUT);
 
   Serial.println("init WiFi...");
   WiFi.mode(WIFI_AP_STA);
@@ -233,8 +326,12 @@ void setup(void){
     Serial.println("WiFi failed, retrying...");
   }
 
+  Serial.print("MAC: ");
+  Serial.println(WiFi.macAddress()); 
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("SSID: ");
+  Serial.println(ssid);
 
   Serial.println("init Webserver...");
 
@@ -265,173 +362,8 @@ void setup(void){
                                      });
 
 
-
-
-  // Handle relay1 .... 
-  httpServer.on("/relay1/on",     [](){ 
-                                        Serial.println("HTTP relay1 on");
-                                        relay1status = ON;
-                                        digitalWrite(RELAY1, ON);
-                                        httpServer.send(200, "text/plain", "relay1 on");
-                                     });
-  httpServer.on("/relay1/off",    [](){ 
-                                        Serial.println("HTTP relay1 off");
-                                        relay1status = OFF;
-                                        digitalWrite(RELAY1, OFF);
-                                        httpServer.send(200, "text/plain", "relay1 off"); 
-                                     });
-  httpServer.on("/relay1/toggle", [](){ 
-                                        Serial.println("HTTP relay1 toggle");
-                                        relay1status = !relay1status; 
-                                        digitalWrite(RELAY1, relay1status); 
-                                        char buffer[2];
-                                        sprintf(buffer, "relay1 %s", relay1status?"off":"on"); 
-                                        httpServer.send(200, "text/plain", buffer); 
-                                     });
-  httpServer.on("/relay1/status", [](){ 
-                                        Serial.println("HTTP relay1 status");
-                                        relay1status = digitalRead(RELAY1);
-                                        char buffer[2];
-                                        sprintf(buffer, "relay1 %s", relay1status?"off":"on"); 
-                                        httpServer.send(200, "text/plain", buffer); 
-                                     });
-
-
-  // Handle Relay 2 .... YES this can be coded better ....
-  httpServer.on("/relay2/on", [](){
-    Serial.println("HTTP relay2 on");
-    digitalWrite(RELAY2, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay2/off", [](){
-    Serial.println("HTTP relay2 off");
-    digitalWrite(RELAY2, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay2/status", [](){
-    Serial.println("HTTP relay2 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY2));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-  // Handle Relay 3 .... YES this can be coded better ....
-  httpServer.on("/relay3/on", [](){
-    Serial.println("HTTP relay3 on");
-    digitalWrite(RELAY3, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay3/off", [](){
-    Serial.println("HTTP relay3 off");
-    digitalWrite(RELAY3, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay3/status", [](){
-    Serial.println("HTTP relay3 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY3));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-  // Handle Relay 4 .... YES this can be coded better ....
-  httpServer.on("/relay4/on", [](){
-    Serial.println("HTTP relay4 on");
-    digitalWrite(RELAY4, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay4/off", [](){
-    Serial.println("HTTP relay4 off");
-    digitalWrite(RELAY4, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay4/status", [](){
-    Serial.println("HTTP relay4 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY4));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 5 .... YES this can be coded better ....
-  httpServer.on("/relay5/on", [](){
-    Serial.println("HTTP relay5 on");
-    digitalWrite(RELAY5, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay5/off", [](){
-    Serial.println("HTTP relay5 off");
-    digitalWrite(RELAY5, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay5/status", [](){
-    Serial.println("HTTP relay5 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY5));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 6 .... YES this can be coded better ....
-  httpServer.on("/relay6/on", [](){
-    Serial.println("HTTP relay6 on");
-    digitalWrite(RELAY6, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay6/off", [](){
-    Serial.println("HTTP relay6 off");
-    digitalWrite(RELAY6, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay6/status", [](){
-    Serial.println("HTTP relay6 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY6));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 7 .... YES this can be coded better ....
-  httpServer.on("/relay7/on", [](){
-    Serial.println("HTTP relay7 on");
-    digitalWrite(RELAY7, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay7/off", [](){
-    Serial.println("HTTP relay7 off");
-    digitalWrite(RELAY7, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay7/status", [](){
-    Serial.println("HTTP relay7 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY7));
-    httpServer.send(200, "text/plain", buffer);
-  });
-
-
-
-  // Handle Relay 8 .... YES this can be coded better ....
-  httpServer.on("/relay8/on", [](){
-    Serial.println("HTTP relay8 on");
-    digitalWrite(RELAY8, ON);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay8/off", [](){
-    Serial.println("HTTP relay8 off");
-    digitalWrite(RELAY8, OFF);
-    httpServer.send(200, "text/plain", "OK");
-  });
-  httpServer.on("/relay8/status", [](){
-    Serial.println("HTTP relay8 status");
-    char buffer[2];
-    sprintf(buffer, "%d", digitalRead(RELAY8));
-    httpServer.send(200, "text/plain", buffer);
-  });
+  // Handle Relays
+  httpRelay();
 
 
   Serial.printf("HTTPUpdateServer ready! Open http://%s.local%s in your browser and login with username '%s' and password '%s'\n", host, update_path, update_username, update_password);
@@ -505,58 +437,34 @@ void loop(void){
       buttonState = tmpButtonState;
     }
     lastButtonState = tmpButtonState;
-  
+ 
+ 
     switch(buttonState){
       case LOW:
         break;
       case BUTTON1:
-        if ( (millis() - lastRelay1Switch) > relaytimer ) {
-          lastRelay1Switch = millis();
-          relay1status = !relay1status;
-          digitalWrite(RELAY1, relay1status);
-        }
+        buttonRelay(&relay1);
         break;
       case BUTTON2:
-        if ( (millis() - lastRelay2Switch) > relaytimer ) {
-          lastRelay2Switch = millis();
-          relay2status = !relay2status;
-          digitalWrite(RELAY2, relay2status);
-        }
+        buttonRelay(&relay2);
         break;
       case BUTTON3:
-        if ( (millis() - lastRelay3Switch) > relaytimer ) {
-          lastRelay3Switch = millis();
-          relay3status = !relay3status;
-          digitalWrite(RELAY3, relay3status);
-        }
+        buttonRelay(&relay3);
         break;
       case BUTTON4:
-        if ( (millis() - lastRelay4Switch) > relaytimer ) {
-          lastRelay4Switch = millis();
-          relay4status = !relay4status;
-          digitalWrite(RELAY4, relay4status);
-        }
+        buttonRelay(&relay4);
         break;
       case BUTTON5:
-        if ( (millis() - lastRelay5Switch) > relaytimer ) {
-          lastRelay5Switch = millis();
-          relay5status = !relay5status;
-          digitalWrite(RELAY5, relay5status);
-        }
+        buttonRelay(&relay5);
         break;
       case BUTTON6:
-        if ( (millis() - lastRelay6Switch) > relaytimer ) {
-          lastRelay6Switch = millis();
-          relay6status = !relay6status;
-          digitalWrite(RELAY6, relay6status);
-        }
+        buttonRelay(&relay6);
         break;
       case BUTTON7:
-        if ( (millis() - lastRelay7Switch) > relaytimer ) {
-          lastRelay7Switch = millis();
-          relay7status = !relay7status;
-          digitalWrite(RELAY7, relay7status);
-        }
+        buttonRelay(&relay7);
+        break;
+      case BUTTON8:
+        buttonRelay(&relay8);
         break;
       case BUTTON8:
         if ( (millis() - lastRelay8Switch) > relaytimer ) {
@@ -570,7 +478,7 @@ void loop(void){
 #ifdef UDP
     if ( reading > 100 ) {
       char buffer[100];
-      sprintf(buffer, "reading %d\tbutton: %d relay1: %d/%d relay2: %d/%d relay3: %d/%d", reading, buttonState, relay1status, lastRelay1Switch, relay2status, lastRelay2Switch, relay3status, lastRelay3Switch );
+      sprintf(buffer, "reading %d\tbutton: %d\n", reading, buttonState);
       Udp.beginPacket("192.168.10.111", 8080);
       Udp.write(buffer);
       Udp.endPacket();
