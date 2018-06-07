@@ -1,5 +1,7 @@
-### Humidity Fan Control
-very simple Arduino sketch to control a humidity regulator for bath room and/or basement.
-it reads temperature and humidity from 2 DHT sensors and controls a fan based on Dewpoint difference
+### Garage essential microcontroller
 
-in short: turns the fan on only when air is dryer outside than inside, otherwise turns it off
+very simple ESP8266 sketch to control 8 relays through 8 buttons using a simple wemos D1 chip.
+
+one pin is also used to read a DHT11/21/22 sensor and can report all of this 
+
+all of this can of course be controlled/read over wifi/curl calls
