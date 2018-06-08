@@ -1,13 +1,5 @@
 //  To upload through terminal you can use: curl -u admin:admin -F "image=@firmware.bin" esp8266-webupdate.local/firmware
 
-/*
-pin connections on breadboard
-d3 = dh22
-a0 = button
-*/
-
-//#define UDP
-
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 
@@ -19,53 +11,33 @@ a0 = button
 #include <WiFiManager.h>          //https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <DNSServer.h>            //Local DNS Server used for redirecting all requests to the configuration portal
 
+//#define UDP
 #ifdef UDP
 #include <WiFiUdp.h>
 #endif
 
 
-#define DHTPIN 0
-
 #define ON LOW
 #define OFF HIGH
 
-#define DHTTYPE DHT22
-#define DHTREADFREQUENCY 30000    // read once every 30 sec
-#define DHTFAILFREQUENCY  3000    // if read failes try again after 3 seconds
+
+struct button {
+  int id;
+  int low;  //low threshold on the A0 input
+  int high; //high threshold on the A0 input
+};
 
 
-#define BUTTON1LOW   1024
-#define BUTTON1HIGH  1024
+constexpr struct button b1 { 1, 1024, 1024 };
+constexpr struct button b2 { 2,  950,  965 };
+constexpr struct button b3 { 3,  835,  855 };
+constexpr struct button b4 { 4,  655,  685 };
+constexpr struct button b5 { 5,  500,  535 };
+constexpr struct button b6 { 6,  465,  485 };
+constexpr struct button b7 { 7,  350,  380 };
+constexpr struct button b8 { 8,  145,  160 };
 
-#define BUTTON2LOW   950
-#define BUTTON2HIGH  965
 
-#define BUTTON3LOW   835
-#define BUTTON3HIGH  855
-
-#define BUTTON4LOW   655
-#define BUTTON4HIGH  685
-
-#define BUTTON5LOW   500
-#define BUTTON5HIGH  535
-
-#define BUTTON6LOW   465
-#define BUTTON6HIGH  485
-
-#define BUTTON7LOW   350
-#define BUTTON7HIGH  380
-
-#define BUTTON8LOW   145
-#define BUTTON8HIGH  160
-
-#define BUTTON1 1
-#define BUTTON2 2
-#define BUTTON3 3
-#define BUTTON4 4
-#define BUTTON5 5
-#define BUTTON6 6
-#define BUTTON7 7
-#define BUTTON8 8
 
 
 struct relay {
@@ -99,6 +71,10 @@ int analogReadDelay = 20;
 
 
 // DHT variabels
+#define DHTTYPE DHT21
+const int dhtpin = D3;
+const int dhtfaildelay =  3000;  // if read failes try again after 3 seconds
+const int dhtreaddelay = 30000;  // read once every 30 sec
 float humidity, temp, hi, dew;
 unsigned long timerdht = 0;
 
@@ -116,9 +92,7 @@ const char* update_password = "toby";
 
 
 
-
-
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(dhtpin, DHTTYPE);
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
@@ -134,12 +108,14 @@ WiFiUDP Udp;
 
 void printConstants() {
   Serial.println("garage-control");
-  Serial.print("Sensor Polling interval: ");
-  Serial.print(DHTREADFREQUENCY);
+  Serial.print("Sensor Polling interval (read/fail): ");
+  Serial.print(dhtreaddelay);
+  Serial.print("/");
+  Serial.print(dhtfaildelay);
   Serial.print("\tDHT Sensor: ");
   Serial.print(DHTTYPE);
   Serial.print("\tPin: ");
-  Serial.println(DHTPIN);
+  Serial.println(dhtpin);
 }
 
 
@@ -383,10 +359,10 @@ void loop(void){
     // Check if any reads failed and exit early (to try again).
     if (isnan(humidity)) {
       Serial.println("Failed to read sensor!");
-      timerdht = millis() + DHTFAILFREQUENCY;    // if sensor reading failed try again after FAILFREQUENCY
+      timerdht = millis() + dhtfaildelay;    // if sensor reading failed try again after FAILFREQUENCY
     } else {
       Serial.println("OK");
-      timerdht = millis() + DHTREADFREQUENCY;
+      timerdht = millis() + dhtreaddelay;
 
       // Adjust values by constant
       //humidity += humidityOffset;
@@ -408,14 +384,14 @@ void loop(void){
     reading = analogRead(A0);
     //Serial.println(reading);
 
-    if      (reading>=BUTTON1LOW && reading<=BUTTON1HIGH) tmpButtonState = BUTTON1;       //Read switch 1
-    else if (reading>=BUTTON2LOW && reading<=BUTTON2HIGH) tmpButtonState = BUTTON2;       //Read switch 2
-    else if (reading>=BUTTON3LOW && reading<=BUTTON3HIGH) tmpButtonState = BUTTON3;       //Read switch 3
-    else if (reading>=BUTTON4LOW && reading<=BUTTON4HIGH) tmpButtonState = BUTTON4;       //Read switch 4
-    else if (reading>=BUTTON5LOW && reading<=BUTTON5HIGH) tmpButtonState = BUTTON5;       //Read switch 5
-    else if (reading>=BUTTON6LOW && reading<=BUTTON6HIGH) tmpButtonState = BUTTON6;       //Read switch 6
-    else if (reading>=BUTTON7LOW && reading<=BUTTON7HIGH) tmpButtonState = BUTTON7;       //Read switch 7
-    else if (reading>=BUTTON8LOW && reading<=BUTTON8HIGH) tmpButtonState = BUTTON8;       //Read switch 8
+    if      (reading>=b1.low && reading<=b1.high) tmpButtonState = b1.id;       //Read switch 1
+    else if (reading>=b2.low && reading<=b2.high) tmpButtonState = b2.id;       //Read switch 2
+    else if (reading>=b3.low && reading<=b3.high) tmpButtonState = b3.id;       //Read switch 3
+    else if (reading>=b4.low && reading<=b4.high) tmpButtonState = b4.id;       //Read switch 4
+    else if (reading>=b5.low && reading<=b5.high) tmpButtonState = b5.id;       //Read switch 5
+    else if (reading>=b6.low && reading<=b6.high) tmpButtonState = b6.id;       //Read switch 6
+    else if (reading>=b7.low && reading<=b7.high) tmpButtonState = b7.id;       //Read switch 7
+    else if (reading>=b8.low && reading<=b8.high) tmpButtonState = b8.id;       //Read switch 8
     else    tmpButtonState = LOW;                                                         //No button is pressed;
   
     if (tmpButtonState != lastButtonState) {
@@ -431,28 +407,28 @@ void loop(void){
     switch(buttonState){
       case LOW:
         break;
-      case BUTTON1:
+      case b1.id:
         buttonRelay(&relay1);
         break;
-      case BUTTON2:
+      case b2.id:
         buttonRelay(&relay2);
         break;
-      case BUTTON3:
+      case b3.id:
         buttonRelay(&relay3);
         break;
-      case BUTTON4:
+      case b4.id:
         buttonRelay(&relay4);
         break;
-      case BUTTON5:
+      case b5.id:
         buttonRelay(&relay5);
         break;
-      case BUTTON6:
+      case b6.id:
         buttonRelay(&relay6);
         break;
-      case BUTTON7:
+      case b7.id:
         buttonRelay(&relay7);
         break;
-      case BUTTON8:
+      case b8.id:
         buttonRelay(&relay8);
         break;
     }
