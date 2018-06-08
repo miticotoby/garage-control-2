@@ -75,7 +75,7 @@ int analogReadDelay = 20;
 const int dhtpin = D3;
 const int dhtfaildelay =  3000;  // if read failes try again after 3 seconds
 const int dhtreaddelay = 30000;  // read once every 30 sec
-float humidity, temp, hi, dew;
+float humidity, temp, hi, dew = 0;
 unsigned long timerdht = 0;
 
 
