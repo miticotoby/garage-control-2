@@ -75,7 +75,7 @@ int analogReadDelay = 20;
 const int dhtpin = D3;
 const int dhtfaildelay =  3000;  // if read failes try again after 3 seconds
 const int dhtreaddelay = 30000;  // read once every 30 sec
-float humidity, temp, hi, dew = 0;
+float humidity, temp, hi, dew = NAN;
 unsigned long timerdht = 0;
 
 
@@ -306,25 +306,25 @@ void setup(void){
   httpServer.on("/humidity",      [](){
                                         Serial.println("HTTP read Humidity");
                                         char buffer[10];
-                                        sprintf(buffer, "%f", humidity);
+                                        sprintf(buffer, "%.1f", humidity);
                                         httpServer.send(200, "text/plain", buffer);
                                      });
   httpServer.on("/temp",          [](){
                                         Serial.println("HTTP read Temperature");
                                         char buffer[10];
-                                        sprintf(buffer, "%f", temp);
+                                        sprintf(buffer, "%.1f", temp);
                                         httpServer.send(200, "text/plain", buffer);
                                      });
   httpServer.on("/dew",           [](){
                                         Serial.println("HTTP read Dewpoint");
                                         char buffer[10];
-                                        sprintf(buffer, "%f", dew);
+                                        sprintf(buffer, "%.1f", dew);
                                         httpServer.send(200, "text/plain", buffer);
                                      });
   httpServer.on("/hi",            [](){
                                         Serial.println("HTTP read Heat Index");
                                         char buffer[10];
-                                        sprintf(buffer, "%f", hi);
+                                        sprintf(buffer, "%.1f", hi);
                                         httpServer.send(200, "text/plain", buffer);
                                      });
 
