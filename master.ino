@@ -440,6 +440,7 @@ void loop(void){
       Udp.beginPacket("192.168.10.111", 8080);
       Udp.write(buffer);
       Udp.endPacket();
+      Serial.print(buffer);
     }
 #endif
 
