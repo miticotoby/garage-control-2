@@ -1,4 +1,4 @@
-//  To upload through terminal you can use: curl -u admin:admin -F "image=@firmware.bin" esp8266-webupdate.local/firmware
+//  To upload through terminal you can use: curl -u toby:pass -F "image=@firmware.bin" http://garage-back/firmware
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -49,12 +49,12 @@ struct relay {
 
 relay relay1 { "relay1", D8, OFF, 0 };
 relay relay2 { "relay2", D7, OFF, 0 };
-relay relay3 { "relay3", D6, OFF, 0 };
-relay relay4 { "relay4", D5, OFF, 0 };
-relay relay5 { "relay5", D0, OFF, 0 };
-relay relay6 { "relay6", D4, OFF, 0 };
-relay relay7 { "relay7", D2, OFF, 0 };
-relay relay8 { "relay8", D1, OFF, 0 };
+relay relay3 { "vent", D6, OFF, 0 };
+relay relay4 { "ceilinglight", D5, OFF, 0 };
+relay relay5 { "walllight", D0, OFF, 0 };
+relay relay6 { "outlet1", D4, OFF, 0 };
+relay relay7 { "outlet2", D2, OFF, 0 };
+relay relay8 { "outlet3", D1, OFF, 0 };
 
 
 
