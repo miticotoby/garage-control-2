@@ -48,10 +48,10 @@ struct relay {
 };
 
 relay relay1 { "relay1", D8, OFF, 0 };
-relay relay2 { "relay2", D7, OFF, 0 };
+relay relay2 { "walllight", D7, OFF, 0 };
 relay relay3 { "vent", D6, OFF, 0 };
 relay relay4 { "ceilinglight", D5, OFF, 0 };
-relay relay5 { "walllight", D0, OFF, 0 };
+relay relay5 { "broken-relay", D0, OFF, 0 };
 relay relay6 { "outlet1", D4, OFF, 0 };
 relay relay7 { "outlet2", D2, OFF, 0 };
 relay relay8 { "outlet3", D1, OFF, 0 };
