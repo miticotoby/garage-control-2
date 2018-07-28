@@ -222,6 +222,19 @@ void httpRelay8SetToggle() {   relay8.status = !relay8.status;        httpRelayS
 void httpRelay8Status()    {                                          httpRelayStatus(&relay8); }
 
 
+void httpRelay3() {
+  String state=httpServer.arg("state");
+
+  httpServer.send(200, "text/plain", state);
+  //server.on("/list", HTTP_GET, printDirectory);
+  //server.on("/edit", HTTP_DELETE, handleDelete);
+  //server.on("/edit", HTTP_PUT, handleCreate);
+  //server.on("/edit", HTTP_POST, [](){ returnOK(); }, handleFileUpload);
+
+}
+
+
+
 void httpRelay() {
 
   httpServer.on("/relay1/on",      httpRelay1SetOn);
@@ -234,6 +247,7 @@ void httpRelay() {
   httpServer.on("/relay2/toggle",  httpRelay2SetToggle);
   httpServer.on("/relay2/status",  httpRelay2Status);
 
+  httpServer.on("/relay3",         httpRelay3);
   httpServer.on("/relay3/on",      httpRelay3SetOn);
   httpServer.on("/relay3/off",     httpRelay3SetOff);
   httpServer.on("/relay3/toggle",  httpRelay3SetToggle);
