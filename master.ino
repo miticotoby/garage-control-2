@@ -169,7 +169,7 @@ void httpRelayStatus(relay *relayPtr) {
    bool status;
    char buffer[50];
    status = digitalRead((*relayPtr).pin);
-   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off":"on"); 
+   sprintf(buffer, "%s %s\n", (*relayPtr).name, (*relayPtr).status?"off (0)":"on (1)"); 
    httpServer.send(200, "text/plain", buffer); 
 }
 
