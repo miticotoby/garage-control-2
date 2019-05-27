@@ -10,6 +10,6 @@ ESP_ROOT=$(HOME)/git/public/esp8266
 HTTP_ADDR = garage-back.lazog.undo.it
 HTTP_URI = /firmware
 HTTP_USR = toby
-#HTTP_PWD = xxxx
+HTTP_PWD = toby
 
 include $(HOME)/git/public/makeEspArduino/makeEspArduino.mk

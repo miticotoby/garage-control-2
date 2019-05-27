@@ -20,6 +20,7 @@
 #define ON LOW
 #define OFF HIGH
 
+unsigned long rebootInterval = 43200000;
 
 struct button {
   int id;
@@ -348,6 +349,9 @@ void setup(void){
 void loop(void){
   httpServer.handleClient();
 
+  if( millis() >= rebootInterval ) {
+    ESP.restart();
+  }
 
   if ( millis() > timerdht ) {    // switch fan not more than once every FANSWITCHFREQUENCY
     Serial.print("DHT ... ");
