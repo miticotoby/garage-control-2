@@ -20,7 +20,7 @@
 #define ON LOW
 #define OFF HIGH
 
-unsigned long rebootInterval = 43200000;
+unsigned long rebootInterval = 86400000;
 
 struct button {
   int id;
@@ -97,7 +97,6 @@ DHT dht(dhtpin, DHTTYPE);
 ESP8266WebServer httpServer(80);
 ESP8266HTTPUpdateServer httpUpdater;
 
-WiFiManager wifiManager;
 
 #ifdef UDP
 WiFiUDP Udp;
@@ -299,8 +298,18 @@ void setup(void){
   pinMode(relay8.pin, OUTPUT);
 
   Serial.println("init WiFi...");
-  wifiManager.autoConnect();
+  WiFiManager wifiManager;
+  wifiManager.setTimeout(180);
+  //wifiManager.autoConnect();
 
+  if(!wifiManager.autoConnect("garage-back")) {
+    Serial.println("failed to connect and hit timeout");
+    delay(3000);
+    //reset and try again, or maybe put it to deep sleep
+    //ESP.reset();
+    ESP.restart();
+    delay(5000);
+  } 
 
   Serial.println("init Webserver...");
   // handle humidity and sensor readings
