@@ -84,7 +84,7 @@ unsigned long timerdht = 0;
 const char* host = "garage-back";
 const char* update_path = "/firmware";
 const char* update_username = "toby";
-const char* update_password = "toby";
+const char* update_password = "back";
 
 
 
@@ -366,19 +366,21 @@ void loop(void){
     Serial.print("DHT ... ");
 
     //// Read sensor
-    humidity = dht.readHumidity();
-    temp = dht.readTemperature();
+    //// Read sensor
+	float tmpTemp = dht.readTemperature();
+	float tmpHumidity = dht.readHumidity();
 
     // Check if any reads failed and exit early (to try again).
-    if (isnan(humidity)) {
+    if (isnan(tmpHumidity) or isnan(tmpTemp)) {
       Serial.println("Failed to read sensor!");
       timerdht = millis() + dhtfaildelay;    // if sensor reading failed try again after FAILFREQUENCY
     } else {
       Serial.println("OK");
-      timerdht = millis() + dhtreaddelay;
 
-      // Adjust values by constant
-      //humidity += humidityOffset;
+      humidity = tmpHumidity;
+      temp = tmpTemp;
+
+      timerdht = millis() + dhtreaddelay;
 
       // Compute heat index and dewpoint
       dew = dewPoint(temp, humidity);
